@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+  <a class="back-btn" href="{{ url_for('index') }}" aria-label="Назад">
+    <i class="fa-solid fa-arrow-left"></i>
+  </a>
+  <h1>Добавление книги</h1>
+</div>
+
+<div class="add-book-card">
+  <form class="add-book-form" method="post" action="{{ url_for('create_book') }}">
+    <div class="form-grid">
+      <label>
+        Название книги
+        <input name="title" type="text" required placeholder="Введите название книги" />
+      </label>
+      <label>
+        Автор
+        <input name="author" type="text" required placeholder="Введите автора" />
+      </label>
+      <label>
+        Год издания
+        <input name="year" type="number" min="0" required value="2024" />
+      </label>
+      <label>
+        Жанр
+        <select name="genre" class="genre-select" required>
+          <option value="" disabled selected>Выберите жанр</option>
+          {% for g in genres %}
+          <option value="{{ g }}">{{ g }}</option>
+          {% endfor %}
+          <option value="{{ genre_other }}">{{ genre_other }}</option>
+        </select>
+      </label>
+      <label class="genre-other-field hidden">
+        Укажите жанр
+        <input name="genre_other" type="text" placeholder="Введите жанр" />
+      </label>
+      <label>
+        Количество экземпляров
+        <input name="copies" type="number" min="0" required value="3" />
+      </label>
+    </div>
+
+    <label class="full-width">
+      Описание
+      <textarea name="description" rows="5" placeholder="Введите описание книги..."></textarea>
+    </label>
+
+    <div class="add-form-actions">
+      <a class="modal-cancel-btn" href="{{ url_for('index') }}">Отмена</a>
+      <button type="submit" class="add-btn">Сохранить книгу</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.querySelectorAll(".genre-select").forEach((select) => {
+    const form = select.closest("form");
+    const otherField = form.querySelector(".genre-other-field");
+    const otherInput = form.querySelector('input[name="genre_other"]');
+    const otherValue = "{{ genre_other }}";
+
+    const toggleOther = () => {
+      const isOther = select.value === otherValue;
+      otherField.classList.toggle("hidden", !isOther);
+      if (otherInput) {
+        otherInput.required = isOther;
+      }
+    };
+
+    select.addEventListener("change", toggleOther);
+    toggleOther();
+  });
+</script>
+{% endblock %}
