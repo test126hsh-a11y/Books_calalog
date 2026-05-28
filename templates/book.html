@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="book-page-header">
+  <div class="book-breadcrumb">
+    <a class="back-btn" href="{{ url_for('index') }}" aria-label="Назад к списку">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <nav class="breadcrumb-text">
+      <a href="{{ url_for('index') }}">Книги</a>
+      <span>&gt;</span>
+      <span class="current">{{ book.title }}</span>
+    </nav>
+  </div>
+  <div class="book-header-actions">
+    <a class="book-edit-btn" href="{{ url_for('edit_book', book_id=book.id, from='view') }}">
+      <i class="fa-solid fa-pen"></i>
+      Редактировать
+    </a>
+    <a class="book-delete-btn" href="{{ url_for('confirm_delete_book', book_id=book.id, from='view') }}">
+      <i class="fa-regular fa-trash-can"></i>
+      Удалить
+    </a>
+  </div>
+</div>
+
+<article class="book-detail-card">
+  <header class="book-detail-head">
+    <h1>{{ book.title }}</h1>
+    <p class="book-author">{{ book.author }}</p>
+  </header>
+
+  <ul class="book-meta-list">
+    <li>
+      <i class="fa-regular fa-calendar"></i>
+      <div>
+        <span class="meta-label">Год издания</span>
+        <span class="meta-value">{{ book.year }}</span>
+      </div>
+    </li>
+    <li>
+      <i class="fa-solid fa-masks-theater"></i>
+      <div>
+        <span class="meta-label">Жанр</span>
+        <span class="meta-value">{{ book.genre }}</span>
+      </div>
+    </li>
+    <li>
+      <i class="fa-solid fa-box"></i>
+      <div>
+        <span class="meta-label">Количество экземпляров</span>
+        <span class="meta-value">{{ book.copies }}</span>
+      </div>
+    </li>
+    <li>
+      <i class="fa-regular fa-user"></i>
+      <div>
+        <span class="meta-label">Доступно</span>
+        <span class="meta-value">{{ book.copies }}</span>
+      </div>
+    </li>
+  </ul>
+
+  <span class="genre-pill">{{ book.genre }}</span>
+
+  <section class="book-description-box">
+    <h2>Описание</h2>
+    {% if book.description %}
+    <p>{{ book.description }}</p>
+    {% else %}
+    <p class="description-empty">Описание пока не добавлено.</p>
+    {% endif %}
+  </section>
+</article>
+
+{% if modal_mode == "edit" and modal_book %}
+<div class="modal-overlay">
+  <div class="edit-modal">
+    <a class="modal-close" href="{{ url_for('view_book', book_id=book.id) }}" aria-label="Закрыть">&times;</a>
+    <div class="edit-modal-header">
+      <h1>Редактирование книги</h1>
+    </div>
+
+    <form class="book-form" method="post" action="{{ url_for('update_book', book_id=modal_book.id) }}">
+      <input type="hidden" name="return_to" value="view" />
+      <label>
+        Название книги
+        <input name="title" type="text" required value="{{ modal_book.title }}" />
+      </label>
+      <label>
+        Автор
+        <input name="author" type="text" required value="{{ modal_book.author }}" />
+      </label>
+      <label>
+        Год издания
+        <input name="year" type="number" min="0" required value="{{ modal_book.year }}" />
+      </label>
+      <label>
+        Жанр
+        <select name="genre" class="genre-select" required>
+          {% for g in genres %}
+          <option value="{{ g }}" {% if form_genre == g %}selected{% endif %}>{{ g }}</option>
+          {% endfor %}
+          <option value="{{ genre_other }}" {% if form_genre == genre_other %}selected{% endif %}>{{ genre_other }}</option>
+        </select>
+      </label>
+      <label class="genre-other-field {% if form_genre != genre_other %}hidden{% endif %}">
+        Укажите жанр
+        <input name="genre_other" type="text" value="{{ form_genre_other }}" placeholder="Введите жанр" />
+      </label>
+      <label>
+        Кол-во экземпляров
+        <input name="copies" type="number" min="0" required value="{{ modal_book.copies }}" />
+      </label>
+      <label>
+        Описание
+        <textarea name="description" rows="4">{{ modal_book.description }}</textarea>
+      </label>
+
+      <div class="form-actions">
+        <a class="modal-cancel-btn" href="{{ url_for('view_book', book_id=book.id) }}">Отмена</a>
+        <button type="submit" class="add-btn">Сохранить изменения</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% if delete_book %}
+<div class="modal-overlay">
+  <div class="delete-modal">
+    <a class="modal-close" href="{{ url_for('view_book', book_id=book.id) }}" aria-label="Закрыть">&times;</a>
+    <div class="delete-icon-wrap">
+      <i class="fa-regular fa-trash-can"></i>
+    </div>
+    <h2>Удалить книгу?</h2>
+    <p class="delete-message">
+      Вы уверены что хотите удалить книгу «{{ delete_book.title }}» {{ delete_book.author }} {{ delete_book.year }} ?
+    </p>
+    <p class="delete-warning">Это действие нельзя отменить</p>
+    <div class="delete-actions">
+      <a class="modal-cancel-btn" href="{{ url_for('view_book', book_id=book.id) }}">Отмена</a>
+      <form method="post" action="{{ url_for('delete_book', book_id=delete_book.id) }}">
+        <button type="submit" class="delete-confirm-btn">Удалить</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if modal_mode == "edit" or delete_book %}
+<script>
+  document.querySelectorAll(".genre-select").forEach((select) => {
+    const form = select.closest("form");
+    const otherField = form.querySelector(".genre-other-field");
+    const otherInput = form.querySelector('input[name="genre_other"]');
+    const otherValue = "{{ genre_other }}";
+
+    const toggleOther = () => {
+      const isOther = select.value === otherValue;
+      otherField.classList.toggle("hidden", !isOther);
+      if (otherInput) {
+        otherInput.required = isOther;
+      }
+    };
+
+    select.addEventListener("change", toggleOther);
+    toggleOther();
+  });
+</script>
+{% endif %}
+{% endblock %}

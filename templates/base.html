@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Книжный каталог</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='plum-logo.png') }}" />
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='plum-logo.png') }}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <div class="container">
+      <aside class="sidebar">
+        <div>
+          <div class="logo">
+            <img
+              src="{{ url_for('static', filename='plum-logo.png') }}"
+              alt="Plums"
+              class="logo-img"
+            />
+            <span>Книжный каталог</span>
+          </div>
+          <nav class="menu">
+            <a href="{{ url_for('index') }}" class="{% if request.endpoint in ('index', 'view_book') %}active{% endif %}">
+              <i class="fa-solid fa-book"></i>
+              Книги
+            </a>
+            <a href="{{ url_for('new_book') }}" class="{% if request.path == url_for('new_book') %}active{% endif %}">
+              <i class="fa-solid fa-plus"></i>
+              Добавить книгу
+            </a>
+          </nav>
+        </div>
+        <div class="brand">Plums</div>
+      </aside>
+      <main class="main-content">{% block content %}{% endblock %}</main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="top-bar">
+  <div class="top-title">
+    <h1>Книги</h1>
+    <p>Управление вашей библиотекой</p>
+  </div>
+  <div class="top-actions">
+    <form class="search-form" method="get" action="{{ url_for('index') }}">
+      <input type="hidden" name="genre" value="{{ filters.genre }}" />
+      <input type="hidden" name="author" value="{{ filters.author }}" />
+      <input type="hidden" name="year" value="{{ filters.year }}" />
+      <input type="hidden" name="sort" value="{{ filters.sort }}" />
+      <input
+        type="text"
+        name="q"
+        placeholder="Поиск по названию, автору или жанру..."
+        value="{{ filters.q }}"
+      />
+      <button type="submit" class="icon-btn" aria-label="Искать">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </form>
+    <a class="add-btn" href="{{ url_for('new_book') }}">
+      <i class="fa-solid fa-plus"></i>
+      Добавить книгу
+    </a>
+  </div>
+</div>
+
+<form class="filters" method="get" action="{{ url_for('index') }}">
+  <input type="hidden" name="q" value="{{ filters.q }}" />
+  <select name="genre" onchange="this.form.submit()">
+    <option value="" {% if not filters.genre %}selected{% endif %}>Все жанры</option>
+    {% for g in genres %}
+    <option value="{{ g }}" {% if filters.genre == g %}selected{% endif %}>{{ g }}</option>
+    {% endfor %}
+    <option value="{{ genre_other }}" {% if filters.genre == genre_other %}selected{% endif %}>{{ genre_other }}</option>
+  </select>
+  <select name="author" onchange="this.form.submit()">
+    <option value="" {% if not filters.author %}selected{% endif %}>Все авторы</option>
+    {% for a in authors %}
+    <option value="{{ a }}" {% if filters.author == a %}selected{% endif %}>{{ a }}</option>
+    {% endfor %}
+  </select>
+  <input type="text" name="year" placeholder="Год издания" value="{{ filters.year }}" />
+  <select name="sort" onchange="this.form.submit()">
+    {% for value, label in sort_options %}
+    <option value="{{ value }}" {% if filters.sort == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <a class="reset-btn" href="{{ url_for('index') }}"><i class="fa-solid fa-rotate-right"></i>Сбросить</a>
+</form>
+
+<div class="table-container">
+  {% if books %}
+  <table>
+    <thead>
+      <tr>
+        <th>№</th>
+        <th>Название</th>
+        <th>Автор</th>
+        <th>Год</th>
+        <th>Жанр</th>
+        <th>Экземпляров</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for book in books %}
+      <tr>
+        <td>{{ pagination.start + loop.index0 }}</td>
+        <td>{{ book.title }}</td>
+        <td>{{ book.author }}</td>
+        <td>{{ book.year }}</td>
+        <td>{{ book.genre }}</td>
+        <td>{{ book.copies }}</td>
+        <td class="actions">
+          <a href="{{ url_for('view_book', book_id=book.id) }}" title="Просмотр"><i class="fa-regular fa-eye"></i></a>
+          <a href="{{ url_for('edit_book', book_id=book.id, **filters) }}" title="Редактировать"><i class="fa-solid fa-pen"></i></a>
+          <a href="{{ url_for('confirm_delete_book', book_id=book.id, **filters) }}" title="Удалить" class="delete-link"><i class="fa-regular fa-trash-can"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="pagination">
+    <span>Показано {{ pagination.start }}-{{ pagination.end }} из {{ pagination.total_books }} книг</span>
+    <div class="pages">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('index', page=pagination.page - 1, **filters) }}">
+        <i class="fa-solid fa-chevron-left"></i>
+      </a>
+      {% else %}
+      <span class="page-disabled"><i class="fa-solid fa-chevron-left"></i></span>
+      {% endif %}
+
+      {% for p in range(1, pagination.total_pages + 1) %}
+      <a href="{{ url_for('index', page=p, **filters) }}" class="{% if p == pagination.page %}active-page{% endif %}">
+        {{ p }}
+      </a>
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <a href="{{ url_for('index', page=pagination.page + 1, **filters) }}">
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+      {% else %}
+      <span class="page-disabled"><i class="fa-solid fa-chevron-right"></i></span>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <table>
+    <tbody>
+      <tr>
+        <td colspan="7" class="empty">Книг пока нет. Добавьте первую запись.</td>
+      </tr>
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+{% if modal_mode == "edit" and modal_book %}
+<div class="modal-overlay">
+  <div class="edit-modal">
+    <a class="modal-close" href="{{ url_for('index', **filters) }}" aria-label="Закрыть">&times;</a>
+    <div class="edit-modal-header">
+      <h1>Редактирование книги</h1>
+    </div>
+
+    <form class="book-form" method="post" action="{{ url_for('update_book', book_id=modal_book.id) }}">
+      <label>
+        Название книги
+        <input name="title" type="text" required value="{{ modal_book.title }}" />
+      </label>
+      <label>
+        Автор
+        <input name="author" type="text" required value="{{ modal_book.author }}" />
+      </label>
+      <label>
+        Год издания
+        <input name="year" type="number" min="0" required value="{{ modal_book.year }}" />
+      </label>
+      <label>
+        Жанр
+        <select name="genre" class="genre-select" required>
+          {% for g in genres %}
+          <option value="{{ g }}" {% if form_genre == g %}selected{% endif %}>{{ g }}</option>
+          {% endfor %}
+          <option value="{{ genre_other }}" {% if form_genre == genre_other %}selected{% endif %}>{{ genre_other }}</option>
+        </select>
+      </label>
+      <label class="genre-other-field {% if form_genre != genre_other %}hidden{% endif %}">
+        Укажите жанр
+        <input name="genre_other" type="text" value="{{ form_genre_other }}" placeholder="Введите жанр" />
+      </label>
+      <label>
+        Кол-во экземпляров
+        <input name="copies" type="number" min="0" required value="{{ modal_book.copies }}" />
+      </label>
+      <label>
+        Описание
+        <textarea name="description" rows="3">{{ modal_book.description }}</textarea>
+      </label>
+
+      <div class="form-actions">
+        <a class="modal-cancel-btn" href="{{ url_for('index', **filters) }}">Отмена</a>
+        <button type="submit" class="add-btn">Сохранить изменения</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% if delete_book %}
+<div class="modal-overlay">
+  <div class="delete-modal">
+    <a class="modal-close" href="{{ url_for('index', **filters) }}" aria-label="Закрыть">&times;</a>
+    <div class="delete-icon-wrap">
+      <i class="fa-regular fa-trash-can"></i>
+    </div>
+    <h2>Удалить книгу?</h2>
+    <p class="delete-message">
+      Вы уверены что хотите удалить книгу «{{ delete_book.title }}» {{ delete_book.author }} {{ delete_book.year }} ?
+    </p>
+    <p class="delete-warning">Это действие нельзя отменить</p>
+    <div class="delete-actions">
+      <a class="modal-cancel-btn" href="{{ url_for('index', **filters) }}">Отмена</a>
+      <form method="post" action="{{ url_for('delete_book', book_id=delete_book.id) }}">
+        <button type="submit" class="delete-confirm-btn">Удалить</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if modal_mode == "edit" or delete_book %}
+<script>
+  document.querySelectorAll(".genre-select").forEach((select) => {
+    const form = select.closest("form");
+    const otherField = form.querySelector(".genre-other-field");
+    const otherInput = form.querySelector('input[name="genre_other"]');
+    const otherValue = "{{ genre_other }}";
+
+    const toggleOther = () => {
+      const isOther = select.value === otherValue;
+      otherField.classList.toggle("hidden", !isOther);
+      if (otherInput) {
+        otherInput.required = isOther;
+      }
+    };
+
+    select.addEventListener("change", toggleOther);
+    toggleOther();
+  });
+</script>
+{% endif %}
+{% endblock %}
