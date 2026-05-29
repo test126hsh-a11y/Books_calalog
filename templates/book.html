@@ -23,54 +23,106 @@
   </div>
 </div>
 
-<article class="book-detail-card">
-  <header class="book-detail-head">
-    <h1>{{ book.title }}</h1>
-    <p class="book-author">{{ book.author }}</p>
-  </header>
+<div class="book-main-layout">
 
-  <ul class="book-meta-list">
-    <li>
-      <i class="fa-regular fa-calendar"></i>
-      <div>
-        <span class="meta-label">Год издания</span>
-        <span class="meta-value">{{ book.year }}</span>
-      </div>
-    </li>
-    <li>
-      <i class="fa-solid fa-masks-theater"></i>
-      <div>
-        <span class="meta-label">Жанр</span>
-        <span class="meta-value">{{ book.genre }}</span>
-      </div>
-    </li>
-    <li>
-      <i class="fa-solid fa-box"></i>
-      <div>
-        <span class="meta-label">Количество экземпляров</span>
-        <span class="meta-value">{{ book.copies }}</span>
-      </div>
-    </li>
-    <li>
-      <i class="fa-regular fa-user"></i>
-      <div>
-        <span class="meta-label">Доступно</span>
-        <span class="meta-value">{{ book.copies }}</span>
-      </div>
-    </li>
-  </ul>
+  <!-- ЛЕВАЯ КОЛОНКА: Информация о книге -->
+  <article class="book-detail-card">
+    <div class="book-detail-main-content">
 
-  <span class="genre-pill">{{ book.genre }}</span>
+      <div class="book-info-wrap">
+        <header class="book-detail-head">
+          <h1>{{ book.title }}</h1>
+          <p class="book-author">{{ book.author }}</p>
+        </header>
 
-  <section class="book-description-box">
-    <h2>Описание</h2>
-    {% if book.description %}
-    <p>{{ book.description }}</p>
-    {% else %}
-    <p class="description-empty">Описание пока не добавлено.</p>
-    {% endif %}
-  </section>
-</article>
+        <!-- Блок списка для десктопа -->
+        <ul class="book-meta-list desktop-only">
+          <li>
+            <i class="fa-regular fa-calendar"></i>
+            <div>
+              <span class="meta-label">Год издания</span>
+              <span class="meta-value">{{ book.year }}</span>
+            </div>
+          </li>
+          <li>
+            <i class="fa-solid fa-masks-theater"></i>
+            <div>
+              <span class="meta-label">Жанр</span>
+              <span class="meta-value">{{ book.genre }}</span>
+            </div>
+          </li>
+          <li>
+            <i class="fa-solid fa-box"></i>
+            <div>
+              <span class="meta-label">Количество экземпляров</span>
+              <span class="meta-value">{{ book.copies }}</span>
+            </div>
+          </li>
+          <li>
+            <i class="fa-regular fa-user"></i>
+            <div>
+              <span class="meta-label">Доступно</span>
+              <span class="meta-value">{% if items %}{{ available_copies }}{% else %}{{ book.copies }}{% endif %}</span>
+            </div>
+          </li>
+        </ul>
+        <span class="genre-pill desktop-only">{{ book.genre }}</span>
+      </div>
+    </div>
+
+    <section class="book-description-box">
+      <h2>Описание</h2>
+      {% if book.description %}
+      <div class="description-text-container">
+        <!-- Обычный вывод текста без обрезания и кнопок -->
+        <p class="description-text">{{ book.description }}</p>
+      </div>
+      {% else %}
+      <p class="description-empty">Описание пока не добавлено.</p>
+      {% endif %}
+    </section>
+  </article>
+
+  <!-- ПРАВАЯ КОЛОНКА: Экземпляры книги -->
+  <aside class="book-instances-card desktop-only">
+    <h2>Экземпляры книги</h2>
+        <div class="instances-list">
+      {% if items %}
+        <!-- Вариант 1: Если экземпляры есть в базе данных -->
+        {% for item in items %}
+        <div class="instance-item">
+          <div class="instance-info">
+            <h3>Экземпляр №{{ loop.index }}</h3>
+            <p class="inv-number">Инвентарный номер {{ item.inventory_number }}</p>
+            {% if item.status == 'Выдан' and item.issue_date %}
+            <p class="issue-date">Выдан {{ item.issue_date }}</p>
+            {% endif %}
+          </div>
+
+          <form method="post" action="{{ url_for('toggle_item_status', item_id=item.id) }}">
+            <button type="submit" class="status-badge-btn {% if item.status == 'Доступен' %}status-available{% else %}status-issued{% endif %}" title="Нажмите, чтобы изменить статус">
+              {{ item.status }}
+            </button>
+          </form>
+        </div>
+        {% endfor %}
+
+      {% else %}
+        <!-- Вариант 2: Если база пуста, генерируем заглушки на основе book.copies -->
+        {% for i in range(1, book.copies + 1) %}
+        <div class="instance-item">
+          <div class="instance-info">
+            <h3>Экземпляр №{{ i }}</h3>
+            <p class="inv-number">Инвентарный номер КН - 000{{ i }}</p>
+          </div>
+          <span class="status-badge status-available">Доступен</span>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </aside>
+
+</div>
 
 {% if modal_mode == "edit" and modal_book %}
 <div class="modal-overlay">
