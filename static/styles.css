@@ -823,3 +823,152 @@ tbody tr {
     font-size: 18px;
   }
 }
+
+/* Двухколоночный макет для страницы книги */
+.book-main-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin-top: 20px;
+}
+
+/* Перестраиваем левую карточку для размещения обложки сбоку */
+.book-detail-main-content {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.book-cover-wrap {
+  width: 160px;
+  height: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e6e7eb;
+  flex-shrink: 0;
+}
+
+.book-cover-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-info-wrap {
+  flex: 1;
+}
+
+/* Стили правой карточки экземпляров */
+.book-instances-card {
+  width: 380px;
+  background: #fff;
+  border: 1px solid #dbdde2;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  flex-shrink: 0;
+}
+
+.book-instances-card h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f1f22;
+  margin-bottom: 18px;
+}
+
+.instances-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.instance-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-top: 1px solid #ececf0;
+}
+
+.instance-item:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.instance-info h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f1f22;
+  margin-bottom: 4px;
+}
+
+.instance-info .inv-number {
+  font-size: 14px;
+  color: #6d7078;
+}
+
+.instance-info .issue-date {
+  font-size: 13px;
+  color: #8a8d96;
+  margin-top: 2px;
+}
+
+/* Бейджи статусов */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Зеленый статус "Доступен" */
+.status-available {
+  background: #D5FFDE;
+  color: #5EBC72;
+}
+
+/* Оранжевый статус "Выдан" */
+.status-issued {
+  background: #FFEEB7;
+  color: #D2B75E;
+}
+
+/* Адаптация под мобильные экраны */
+@media (max-width: 980px) {
+  .book-main-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .book-detail-main-content {
+  margin-bottom: 24px;
+}
+
+  .book-meta-list li {
+    justify-content: center;
+    text-align: left;
+  }
+
+  .book-instances-card {
+    width: 100%;
+  }
+}
+
+.status-badge-btn {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.status-badge-btn:hover {
+  opacity: 0.85;
+}
+
+.status-badge-btn:active {
+  transform: scale(0.96); /* Легкий эффект нажатия */
+}
