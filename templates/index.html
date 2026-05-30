@@ -14,9 +14,17 @@
       <input
         type="text"
         name="q"
+        class="search-input"
         placeholder="Поиск по названию, автору или жанру..."
         value="{{ filters.q }}"
       />
+      <button
+        type="button"
+        class="search-clear-btn{% if filters.q %} is-visible{% endif %}"
+        aria-label="Очистить поиск"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
       <button type="submit" class="icon-btn" aria-label="Искать">
         <i class="fa-solid fa-magnifying-glass"></i>
       </button>
@@ -28,28 +36,56 @@
   </div>
 </div>
 
-<form class="filters" method="get" action="{{ url_for('index') }}">
+<form class="filters" method="get" action="{{ url_for('index') }}" id="filters-form">
   <input type="hidden" name="q" value="{{ filters.q }}" />
-  <select name="genre" onchange="this.form.submit()">
-    <option value="" {% if not filters.genre %}selected{% endif %}>Все жанры</option>
-    {% for g in genres %}
-    <option value="{{ g }}" {% if filters.genre == g %}selected{% endif %}>{{ g }}</option>
-    {% endfor %}
-    <option value="{{ genre_other }}" {% if filters.genre == genre_other %}selected{% endif %}>{{ genre_other }}</option>
-  </select>
-  <select name="author" onchange="this.form.submit()">
-    <option value="" {% if not filters.author %}selected{% endif %}>Все авторы</option>
-    {% for a in authors %}
-    <option value="{{ a }}" {% if filters.author == a %}selected{% endif %}>{{ a }}</option>
-    {% endfor %}
-  </select>
+
+  <div class="filter-dropdown" data-filter="genre">
+    <input type="hidden" name="genre" value="{{ filters.genre }}" />
+    <button type="button" class="filter-dropdown-trigger" aria-expanded="false">
+      <span class="filter-dropdown-text">{{ filters.genre if filters.genre else 'Все жанры' }}</span>
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
+    <ul class="filter-dropdown-menu" role="listbox">
+      <li role="option" data-value="" data-label="Все жанры" class="{% if not filters.genre %}is-selected{% endif %}">Все жанры</li>
+      {% for g in genres %}
+      <li role="option" data-value="{{ g }}" data-label="{{ g }}" class="{% if filters.genre == g %}is-selected{% endif %}">{{ g }}</li>
+      {% endfor %}
+      <li role="option" data-value="{{ genre_other }}" data-label="{{ genre_other }}" class="{% if filters.genre == genre_other %}is-selected{% endif %}">{{ genre_other }}</li>
+    </ul>
+  </div>
+
+  <div class="filter-dropdown" data-filter="author">
+    <input type="hidden" name="author" value="{{ filters.author }}" />
+    <button type="button" class="filter-dropdown-trigger" aria-expanded="false">
+      <span class="filter-dropdown-text">{{ filters.author if filters.author else 'Все авторы' }}</span>
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
+    <ul class="filter-dropdown-menu" role="listbox">
+      <li role="option" data-value="" data-label="Все авторы" class="{% if not filters.author %}is-selected{% endif %}">Все авторы</li>
+      {% for a in authors %}
+      <li role="option" data-value="{{ a }}" data-label="{{ a }}" class="{% if filters.author == a %}is-selected{% endif %}">{{ a }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
   <input type="text" name="year" placeholder="Год издания" value="{{ filters.year }}" />
-  <select name="sort" onchange="this.form.submit()">
-    {% for value, label in sort_options %}
-    <option value="{{ value }}" {% if filters.sort == value %}selected{% endif %}>{{ label }}</option>
-    {% endfor %}
-  </select>
-  <a class="reset-btn" href="{{ url_for('index') }}"><i class="fa-solid fa-rotate-right"></i>Сбросить</a>
+
+  <div class="filter-dropdown" data-filter="sort">
+    <input type="hidden" name="sort" value="{{ filters.sort }}" />
+    <button type="button" class="filter-dropdown-trigger" aria-expanded="false">
+      <span class="filter-dropdown-text">Сортировка</span>
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
+    <ul class="filter-dropdown-menu" role="listbox">
+      {% for value, label in sort_options %}
+      <li role="option" data-value="{{ value }}" data-label="{{ label }}" class="{% if filters.sort == value %}is-selected{% endif %}">{{ label }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <a class="reset-btn" href="{% if filters.q %}{{ url_for('index', q=filters.q) }}{% else %}{{ url_for('index') }}{% endif %}">
+    <i class="fa-solid fa-rotate-right"></i>Сбросить
+  </a>
 </form>
 
 <div class="table-container">
@@ -76,9 +112,9 @@
         <td>{{ book.genre }}</td>
         <td>{{ book.copies }}</td>
         <td class="actions">
-          <a href="{{ url_for('view_book', book_id=book.id) }}" title="Просмотр"><i class="fa-regular fa-eye"></i></a>
-          <a href="{{ url_for('edit_book', book_id=book.id, **filters) }}" title="Редактировать"><i class="fa-solid fa-pen"></i></a>
-          <a href="{{ url_for('confirm_delete_book', book_id=book.id, **filters) }}" title="Удалить" class="delete-link"><i class="fa-regular fa-trash-can"></i></a>
+          <a href="{{ filter_url('view_book', filter_query, book_id=book.id) }}" title="Просмотр"><i class="fa-regular fa-eye"></i></a>
+          <a href="{{ filter_url('edit_book', filter_query, book_id=book.id) }}" title="Редактировать"><i class="fa-solid fa-pen"></i></a>
+          <a href="{{ filter_url('confirm_delete_book', filter_query, book_id=book.id) }}" title="Удалить" class="delete-link"><i class="fa-regular fa-trash-can"></i></a>
         </td>
       </tr>
       {% endfor %}
@@ -88,7 +124,7 @@
     <span>Показано {{ pagination.start }}-{{ pagination.end }} из {{ pagination.total_books }} книг</span>
     <div class="pages">
       {% if pagination.has_prev %}
-      <a href="{{ url_for('index', page=pagination.page - 1, **filters) }}">
+      <a href="{{ filter_url('index', filter_query, page=pagination.page - 1) }}">
         <i class="fa-solid fa-chevron-left"></i>
       </a>
       {% else %}
@@ -96,13 +132,13 @@
       {% endif %}
 
       {% for p in range(1, pagination.total_pages + 1) %}
-      <a href="{{ url_for('index', page=p, **filters) }}" class="{% if p == pagination.page %}active-page{% endif %}">
+      <a href="{{ filter_url('index', filter_query, page=p) }}" class="{% if p == pagination.page %}active-page{% endif %}">
         {{ p }}
       </a>
       {% endfor %}
 
       {% if pagination.has_next %}
-      <a href="{{ url_for('index', page=pagination.page + 1, **filters) }}">
+      <a href="{{ filter_url('index', filter_query, page=pagination.page + 1) }}">
         <i class="fa-solid fa-chevron-right"></i>
       </a>
       {% else %}
@@ -124,12 +160,12 @@
 {% if modal_mode == "edit" and modal_book %}
 <div class="modal-overlay">
   <div class="edit-modal">
-    <a class="modal-close" href="{{ url_for('index', **filters) }}" aria-label="Закрыть">&times;</a>
+    <a class="modal-close" href="{{ filter_url('index', filter_query) }}" aria-label="Закрыть">&times;</a>
     <div class="edit-modal-header">
       <h1>Редактирование книги</h1>
     </div>
 
-    <form class="book-form" method="post" action="{{ url_for('update_book', book_id=modal_book.id) }}">
+    <form class="book-form" method="post" action="{{ filter_url('update_book', filter_query, book_id=modal_book.id) }}">
       <label>
         Название книги
         <input name="title" type="text" required value="{{ modal_book.title }}" />
@@ -165,7 +201,7 @@
       </label>
 
       <div class="form-actions">
-        <a class="modal-cancel-btn" href="{{ url_for('index', **filters) }}">Отмена</a>
+        <a class="modal-cancel-btn" href="{{ filter_url('index', filter_query) }}">Отмена</a>
         <button type="submit" class="add-btn">Сохранить изменения</button>
       </div>
     </form>
@@ -176,7 +212,7 @@
 {% if delete_book %}
 <div class="modal-overlay">
   <div class="delete-modal">
-    <a class="modal-close" href="{{ url_for('index', **filters) }}" aria-label="Закрыть">&times;</a>
+    <a class="modal-close" href="{{ filter_url('index', filter_query) }}" aria-label="Закрыть">&times;</a>
     <div class="delete-icon-wrap">
       <i class="fa-regular fa-trash-can"></i>
     </div>
@@ -186,14 +222,91 @@
     </p>
     <p class="delete-warning">Это действие нельзя отменить</p>
     <div class="delete-actions">
-      <a class="modal-cancel-btn" href="{{ url_for('index', **filters) }}">Отмена</a>
-      <form method="post" action="{{ url_for('delete_book', book_id=delete_book.id) }}">
+      <a class="modal-cancel-btn" href="{{ filter_url('index', filter_query) }}">Отмена</a>
+      <form method="post" action="{{ filter_url('delete_book', filter_query, book_id=delete_book.id) }}">
         <button type="submit" class="delete-confirm-btn">Удалить</button>
       </form>
     </div>
   </div>
 </div>
 {% endif %}
+
+<script>
+  (function () {
+    const filtersForm = document.getElementById("filters-form");
+    if (!filtersForm) return;
+
+    const closeAllDropdowns = (except) => {
+      filtersForm.querySelectorAll(".filter-dropdown").forEach((dropdown) => {
+        if (dropdown !== except) {
+          dropdown.classList.remove("is-open");
+          dropdown.querySelector(".filter-dropdown-trigger")?.setAttribute("aria-expanded", "false");
+        }
+      });
+    };
+
+    filtersForm.querySelectorAll(".filter-dropdown").forEach((dropdown) => {
+      const trigger = dropdown.querySelector(".filter-dropdown-trigger");
+      const menu = dropdown.querySelector(".filter-dropdown-menu");
+      const hiddenInput = dropdown.querySelector('input[type="hidden"]:not([name="q"])');
+      const label = dropdown.querySelector(".filter-dropdown-text");
+      const isSort = dropdown.dataset.filter === "sort";
+
+      trigger.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const willOpen = !dropdown.classList.contains("is-open");
+        closeAllDropdowns(willOpen ? dropdown : null);
+        dropdown.classList.toggle("is-open", willOpen);
+        trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      });
+
+      menu.querySelectorAll("li[role='option']").forEach((item) => {
+        item.addEventListener("click", () => {
+          const value = item.dataset.value ?? "";
+          const itemLabel = item.dataset.label || item.textContent.trim();
+
+          hiddenInput.value = value;
+          if (!isSort) {
+            label.textContent = itemLabel;
+          }
+
+          menu.querySelectorAll("li").forEach((li) => li.classList.remove("is-selected"));
+          item.classList.add("is-selected");
+
+          dropdown.classList.remove("is-open");
+          trigger.setAttribute("aria-expanded", "false");
+          filtersForm.submit();
+        });
+      });
+    });
+
+    document.addEventListener("click", () => closeAllDropdowns());
+  })();
+</script>
+
+<script>
+  (function () {
+    const searchForm = document.querySelector(".search-form");
+    if (!searchForm) return;
+
+    const searchInput = searchForm.querySelector(".search-input");
+    const clearBtn = searchForm.querySelector(".search-clear-btn");
+    if (!searchInput || !clearBtn) return;
+
+    const updateClearVisibility = () => {
+      clearBtn.classList.toggle("is-visible", searchInput.value.trim().length > 0);
+    };
+
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      updateClearVisibility();
+      searchForm.submit();
+    });
+
+    searchInput.addEventListener("input", updateClearVisibility);
+    updateClearVisibility();
+  })();
+</script>
 
 {% if modal_mode == "edit" or delete_book %}
 <script>

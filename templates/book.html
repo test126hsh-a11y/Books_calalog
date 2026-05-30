@@ -2,137 +2,116 @@
 {% block content %}
 <div class="book-page-header">
   <div class="book-breadcrumb">
-    <a class="back-btn" href="{{ url_for('index') }}" aria-label="Назад к списку">
+    <a class="back-btn" href="{{ filter_url('index', filter_query) }}" aria-label="Назад к списку">
       <i class="fa-solid fa-arrow-left"></i>
     </a>
     <nav class="breadcrumb-text">
-      <a href="{{ url_for('index') }}">Книги</a>
+      <a href="{{ filter_url('index', filter_query) }}">Книги</a>
       <span>&gt;</span>
       <span class="current">{{ book.title }}</span>
     </nav>
   </div>
   <div class="book-header-actions">
-    <a class="book-edit-btn" href="{{ url_for('edit_book', book_id=book.id, from='view') }}">
+    <a class="book-edit-btn" href="{{ filter_url('edit_book', filter_query, book_id=book.id, from='view') }}">
       <i class="fa-solid fa-pen"></i>
       Редактировать
     </a>
-    <a class="book-delete-btn" href="{{ url_for('confirm_delete_book', book_id=book.id, from='view') }}">
+    <a class="book-delete-btn" href="{{ filter_url('confirm_delete_book', filter_query, book_id=book.id, from='view') }}">
       <i class="fa-regular fa-trash-can"></i>
       Удалить
     </a>
   </div>
 </div>
 
-<div class="book-main-layout">
-
-  <!-- ЛЕВАЯ КОЛОНКА: Информация о книге -->
+<div class="book-detail-layout">
   <article class="book-detail-card">
-    <div class="book-detail-main-content">
+    <header class="book-detail-head">
+      <h1>{{ book.title }}</h1>
+      <p class="book-author">{{ book.author }}</p>
+    </header>
 
-      <div class="book-info-wrap">
-        <header class="book-detail-head">
-          <h1>{{ book.title }}</h1>
-          <p class="book-author">{{ book.author }}</p>
-        </header>
+    <ul class="book-meta-list">
+      <li>
+        <i class="fa-regular fa-calendar"></i>
+        <div>
+          <span class="meta-label">Год издания</span>
+          <span class="meta-value">{{ book.year }}</span>
+        </div>
+      </li>
+      <li>
+        <i class="fa-solid fa-masks-theater"></i>
+        <div>
+          <span class="meta-label">Жанр</span>
+          <span class="meta-value">{{ book.genre }}</span>
+        </div>
+      </li>
+      <li>
+        <i class="fa-solid fa-box"></i>
+        <div>
+          <span class="meta-label">Количество экземпляров</span>
+          <span class="meta-value">{{ book.copies }}</span>
+        </div>
+      </li>
+      <li>
+        <i class="fa-regular fa-user"></i>
+        <div>
+          <span class="meta-label">Доступно</span>
+          <span class="meta-value" id="available-count">{{ available_count }}</span>
+        </div>
+      </li>
+    </ul>
 
-        <!-- Блок списка для десктопа -->
-        <ul class="book-meta-list desktop-only">
-          <li>
-            <i class="fa-regular fa-calendar"></i>
-            <div>
-              <span class="meta-label">Год издания</span>
-              <span class="meta-value">{{ book.year }}</span>
-            </div>
-          </li>
-          <li>
-            <i class="fa-solid fa-masks-theater"></i>
-            <div>
-              <span class="meta-label">Жанр</span>
-              <span class="meta-value">{{ book.genre }}</span>
-            </div>
-          </li>
-          <li>
-            <i class="fa-solid fa-box"></i>
-            <div>
-              <span class="meta-label">Количество экземпляров</span>
-              <span class="meta-value">{{ book.copies }}</span>
-            </div>
-          </li>
-          <li>
-            <i class="fa-regular fa-user"></i>
-            <div>
-              <span class="meta-label">Доступно</span>
-              <span class="meta-value">{% if items %}{{ available_copies }}{% else %}{{ book.copies }}{% endif %}</span>
-            </div>
-          </li>
-        </ul>
-        <span class="genre-pill desktop-only">{{ book.genre }}</span>
-      </div>
-    </div>
+    <span class="genre-pill">{{ book.genre }}</span>
 
     <section class="book-description-box">
       <h2>Описание</h2>
       {% if book.description %}
-      <div class="description-text-container">
-        <!-- Обычный вывод текста без обрезания и кнопок -->
-        <p class="description-text">{{ book.description }}</p>
-      </div>
+      <p>{{ book.description }}</p>
       {% else %}
       <p class="description-empty">Описание пока не добавлено.</p>
       {% endif %}
     </section>
   </article>
 
-  <!-- ПРАВАЯ КОЛОНКА: Экземпляры книги -->
-  <aside class="book-instances-card desktop-only">
-    <h2>Экземпляры книги</h2>
-        <div class="instances-list">
-      {% if items %}
-        <!-- Вариант 1: Если экземпляры есть в базе данных -->
-        {% for item in items %}
-        <div class="instance-item">
-          <div class="instance-info">
-            <h3>Экземпляр №{{ loop.index }}</h3>
-            <p class="inv-number">Инвентарный номер {{ item.inventory_number }}</p>
-            {% if item.status == 'Выдан' and item.issue_date %}
-            <p class="issue-date">Выдан {{ item.issue_date }}</p>
-            {% endif %}
-          </div>
-
-          <form method="post" action="{{ url_for('toggle_item_status', item_id=item.id) }}">
-            <button type="submit" class="status-badge-btn {% if item.status == 'Доступен' %}status-available{% else %}status-issued{% endif %}" title="Нажмите, чтобы изменить статус">
-              {{ item.status }}
-            </button>
-          </form>
+  <aside class="book-copies-card">
+    <h2 class="book-copies-title">Экземпляры книги</h2>
+    {% if copies %}
+    <ul class="book-copies-list">
+      {% for copy in copies %}
+      <li class="book-copy-row" data-copy-num="{{ copy.copy_num }}">
+        <div class="book-copy-info">
+          <span class="book-copy-name">Экземпляр №{{ copy.copy_num }}</span>
+          <span class="book-copy-inventory">Инвентарный номер {{ copy.inventory_no }}</span>
+          <span class="book-copy-issued-date{% if copy.status != 'issued' %} hidden{% endif %}">
+            Выдан {{ copy.issued_at or today }}
+          </span>
         </div>
-        {% endfor %}
-
-      {% else %}
-        <!-- Вариант 2: Если база пуста, генерируем заглушки на основе book.copies -->
-        {% for i in range(1, book.copies + 1) %}
-        <div class="instance-item">
-          <div class="instance-info">
-            <h3>Экземпляр №{{ i }}</h3>
-            <p class="inv-number">Инвентарный номер КН - 000{{ i }}</p>
-          </div>
-          <span class="status-badge status-available">Доступен</span>
-        </div>
-        {% endfor %}
-      {% endif %}
-    </div>
+        <button
+          type="button"
+          class="copy-status-btn {% if copy.status == 'issued' %}is-issued{% else %}is-available{% endif %}"
+          data-book-id="{{ book.id }}"
+          data-copy-num="{{ copy.copy_num }}"
+        >
+          {% if copy.status == 'issued' %}Выдан{% else %}Доступен{% endif %}
+        </button>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="book-copies-empty">Экземпляры не добавлены.</p>
+    {% endif %}
   </aside>
-
 </div>
 
 {% if modal_mode == "edit" and modal_book %}
 <div class="modal-overlay">
   <div class="edit-modal">
-    <a class="modal-close" href="{{ url_for('view_book', book_id=book.id) }}" aria-label="Закрыть">&times;</a>
+    <a class="modal-close" href="{{ filter_url('view_book', filter_query, book_id=book.id) }}" aria-label="Закрыть">&times;</a>
     <div class="edit-modal-header">
       <h1>Редактирование книги</h1>
     </div>
 
-    <form class="book-form" method="post" action="{{ url_for('update_book', book_id=modal_book.id) }}">
+    <form class="book-form" method="post" action="{{ filter_url('update_book', filter_query, book_id=modal_book.id) }}">
       <input type="hidden" name="return_to" value="view" />
       <label>
         Название книги
@@ -169,7 +148,7 @@
       </label>
 
       <div class="form-actions">
-        <a class="modal-cancel-btn" href="{{ url_for('view_book', book_id=book.id) }}">Отмена</a>
+        <a class="modal-cancel-btn" href="{{ filter_url('view_book', filter_query, book_id=book.id) }}">Отмена</a>
         <button type="submit" class="add-btn">Сохранить изменения</button>
       </div>
     </form>
@@ -180,7 +159,7 @@
 {% if delete_book %}
 <div class="modal-overlay">
   <div class="delete-modal">
-    <a class="modal-close" href="{{ url_for('view_book', book_id=book.id) }}" aria-label="Закрыть">&times;</a>
+    <a class="modal-close" href="{{ filter_url('view_book', filter_query, book_id=book.id) }}" aria-label="Закрыть">&times;</a>
     <div class="delete-icon-wrap">
       <i class="fa-regular fa-trash-can"></i>
     </div>
@@ -190,14 +169,51 @@
     </p>
     <p class="delete-warning">Это действие нельзя отменить</p>
     <div class="delete-actions">
-      <a class="modal-cancel-btn" href="{{ url_for('view_book', book_id=book.id) }}">Отмена</a>
-      <form method="post" action="{{ url_for('delete_book', book_id=delete_book.id) }}">
+      <a class="modal-cancel-btn" href="{{ filter_url('view_book', filter_query, book_id=book.id) }}">Отмена</a>
+      <form method="post" action="{{ filter_url('delete_book', filter_query, book_id=delete_book.id) }}">
         <button type="submit" class="delete-confirm-btn">Удалить</button>
       </form>
     </div>
   </div>
 </div>
 {% endif %}
+
+<script>
+  document.querySelectorAll(".copy-status-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const bookId = btn.dataset.bookId;
+      const copyNum = btn.dataset.copyNum;
+      const row = btn.closest(".book-copy-row");
+      const issuedDate = row.querySelector(".book-copy-issued-date");
+
+      try {
+        const response = await fetch(`/books/${bookId}/copies/${copyNum}/issue`, {
+          method: "POST",
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+        });
+        const data = await response.json();
+        if (!data.ok) return;
+
+        const isIssued = data.status === "issued";
+        btn.classList.toggle("is-issued", isIssued);
+        btn.classList.toggle("is-available", !isIssued);
+        btn.textContent = isIssued ? "Выдан" : "Доступен";
+
+        issuedDate.classList.toggle("hidden", !isIssued);
+        if (isIssued && data.issued_at) {
+          issuedDate.textContent = `Выдан ${data.issued_at}`;
+        }
+
+        const availableEl = document.getElementById("available-count");
+        if (availableEl) {
+          availableEl.textContent = data.available_count;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+</script>
 
 {% if modal_mode == "edit" or delete_book %}
 <script>
