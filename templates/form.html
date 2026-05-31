@@ -1,6 +1,13 @@
 {% extends "base.html" %}
+{% block mobile_header %}
+<a class="mobile-back-link" href="{{ url_for('index') }}" aria-label="Назад">
+  <i class="fa-solid fa-arrow-left"></i>
+</a>
+<h1 class="mobile-header-title">{% if mode == 'create' %}Добавление книги{% else %}Редактирование{% endif %}</h1>
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
+<div class="page-header desktop-only">
   <a class="back-btn" href="{{ url_for('index') }}" aria-label="Назад">
     <i class="fa-solid fa-arrow-left"></i>
   </a>
@@ -53,7 +60,9 @@
     </div>
   </form>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
   document.querySelectorAll(".genre-select").forEach((select) => {
     const form = select.closest("form");

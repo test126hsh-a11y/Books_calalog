@@ -13,8 +13,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
   </head>
   <body>
+    <header class="mobile-header mobile-only">
+      {% block mobile_header %}
+      <a class="mobile-menu-btn" href="{{ url_for('mobile_menu') }}" aria-label="Открыть меню">
+        <i class="fa-solid fa-bars"></i>
+      </a>
+      <h1 class="mobile-header-title">{% block mobile_title %}Книжный каталог{% endblock %}</h1>
+      {% endblock %}
+    </header>
+
     <div class="container">
-      <aside class="sidebar">
+      <aside class="sidebar desktop-only">
         <div>
           <div class="logo">
             <img
@@ -39,5 +48,7 @@
       </aside>
       <main class="main-content">{% block content %}{% endblock %}</main>
     </div>
+
+    {% block scripts %}{% endblock %}
   </body>
 </html>
