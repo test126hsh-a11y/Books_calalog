@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+{% block mobile_title %}Книги{% endblock %}
 {% block content %}
-<div class="top-bar">
-  <div class="top-title">
-    <h1>Книги</h1>
-    <p>Управление вашей библиотекой</p>
-  </div>
-  <div class="top-actions">
-    <form class="search-form" method="get" action="{{ url_for('index') }}">
+
+{# ===== MOBILE ===== #}
+<section class="mobile-page mobile-only">
+  <p class="mobile-catalog-count">{{ pagination.total_books }} книг в каталоге</p>
+
+  <div class="mobile-toolbar">
+    <form class="mobile-search-form" method="get" action="{{ url_for('index') }}">
       <input type="hidden" name="genre" value="{{ filters.genre }}" />
       <input type="hidden" name="author" value="{{ filters.author }}" />
       <input type="hidden" name="year" value="{{ filters.year }}" />
@@ -15,7 +16,7 @@
         type="text"
         name="q"
         class="search-input"
-        placeholder="Поиск по названию, автору или жанру..."
+        placeholder="Поиск книг..."
         value="{{ filters.q }}"
       />
       <button
@@ -25,70 +26,137 @@
       >
         <i class="fa-solid fa-xmark"></i>
       </button>
-      <button type="submit" class="icon-btn" aria-label="Искать">
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </button>
     </form>
-    <a class="add-btn" href="{{ url_for('new_book') }}">
+    <button type="button" class="mobile-filter-btn" aria-label="Фильтры">
+      <i class="fa-solid fa-filter"></i>
+    </button>
+    <a class="mobile-add-btn" href="{{ url_for('new_book') }}" aria-label="Добавить книгу">
       <i class="fa-solid fa-plus"></i>
-      Добавить книгу
     </a>
+  </div>
+
+  {% if filters.q %}
+  <p class="mobile-results-label">Результаты ({{ pagination.total_books }})</p>
+  {% endif %}
+
+  <div class="mobile-book-list">
+    {% if all_books %}
+      {% for book in all_books %}
+      <a class="mobile-book-card" href="{{ filter_url('view_book', filter_query, book_id=book.id) }}">
+        <h3 class="mobile-book-title">{{ book.title }}</h3>
+        <p class="mobile-book-author">{{ book.author }}</p>
+        <p class="mobile-book-meta">{{ book.year }} / {{ book.genre }} / {{ book.copies }} экз.</p>
+      </a>
+      {% endfor %}
+    {% else %}
+      <p class="mobile-empty">Книг пока нет. Добавьте первую запись.</p>
+    {% endif %}
+  </div>
+</section>
+
+{# ===== DESKTOP ===== #}
+<div class="desktop-only">
+  <div class="top-bar">
+    <div class="top-title">
+      <h1>Книги</h1>
+      <p>Управление вашей библиотекой</p>
+    </div>
+    <div class="top-actions">
+      <form class="search-form" method="get" action="{{ url_for('index') }}">
+        <input type="hidden" name="genre" value="{{ filters.genre }}" />
+        <input type="hidden" name="author" value="{{ filters.author }}" />
+        <input type="hidden" name="year" value="{{ filters.year }}" />
+        <input type="hidden" name="sort" value="{{ filters.sort }}" />
+        <input
+          type="text"
+          name="q"
+          class="search-input"
+          placeholder="Поиск по названию, автору или жанру..."
+          value="{{ filters.q }}"
+        />
+        <button
+          type="button"
+          class="search-clear-btn{% if filters.q %} is-visible{% endif %}"
+          aria-label="Очистить поиск"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <button type="submit" class="icon-btn" aria-label="Искать">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </form>
+      <a class="add-btn" href="{{ url_for('new_book') }}">
+        <i class="fa-solid fa-plus"></i>
+        Добавить книгу
+      </a>
+    </div>
   </div>
 </div>
 
-<form class="filters" method="get" action="{{ url_for('index') }}" id="filters-form">
-  <input type="hidden" name="q" value="{{ filters.q }}" />
+<div class="filters-wrap" id="filters-wrap">
+  <div class="mobile-filters-backdrop mobile-only"></div>
+  <div class="filters-panel">
+    <div class="mobile-filters-head mobile-only">
+      <h2>Фильтры</h2>
+      <button type="button" class="mobile-filters-close" aria-label="Закрыть">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <form class="filters" method="get" action="{{ url_for('index') }}" id="filters-form">
+    <input type="hidden" name="q" value="{{ filters.q }}" />
 
-  <div class="filter-dropdown" data-filter="genre">
-    <input type="hidden" name="genre" value="{{ filters.genre }}" />
-    <button type="button" class="filter-dropdown-trigger" aria-expanded="false">
-      <span class="filter-dropdown-text">{{ filters.genre if filters.genre else 'Все жанры' }}</span>
-      <i class="fa-solid fa-chevron-down"></i>
-    </button>
-    <ul class="filter-dropdown-menu" role="listbox">
-      <li role="option" data-value="" data-label="Все жанры" class="{% if not filters.genre %}is-selected{% endif %}">Все жанры</li>
-      {% for g in genres %}
-      <li role="option" data-value="{{ g }}" data-label="{{ g }}" class="{% if filters.genre == g %}is-selected{% endif %}">{{ g }}</li>
-      {% endfor %}
-      <li role="option" data-value="{{ genre_other }}" data-label="{{ genre_other }}" class="{% if filters.genre == genre_other %}is-selected{% endif %}">{{ genre_other }}</li>
-    </ul>
+    <div class="filter-dropdown" data-filter="genre">
+      <input type="hidden" name="genre" value="{{ filters.genre }}" />
+      <button type="button" class="filter-dropdown-trigger" aria-expanded="false">
+        <span class="filter-dropdown-text">{{ filters.genre if filters.genre else 'Все жанры' }}</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+      <ul class="filter-dropdown-menu" role="listbox">
+        <li role="option" data-value="" data-label="Все жанры" class="{% if not filters.genre %}is-selected{% endif %}">Все жанры</li>
+        {% for g in genres %}
+        <li role="option" data-value="{{ g }}" data-label="{{ g }}" class="{% if filters.genre == g %}is-selected{% endif %}">{{ g }}</li>
+        {% endfor %}
+        <li role="option" data-value="{{ genre_other }}" data-label="{{ genre_other }}" class="{% if filters.genre == genre_other %}is-selected{% endif %}">{{ genre_other }}</li>
+      </ul>
+    </div>
+
+    <div class="filter-dropdown" data-filter="author">
+      <input type="hidden" name="author" value="{{ filters.author }}" />
+      <button type="button" class="filter-dropdown-trigger" aria-expanded="false">
+        <span class="filter-dropdown-text">{{ filters.author if filters.author else 'Все авторы' }}</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+      <ul class="filter-dropdown-menu" role="listbox">
+        <li role="option" data-value="" data-label="Все авторы" class="{% if not filters.author %}is-selected{% endif %}">Все авторы</li>
+        {% for a in authors %}
+        <li role="option" data-value="{{ a }}" data-label="{{ a }}" class="{% if filters.author == a %}is-selected{% endif %}">{{ a }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <input type="text" name="year" placeholder="Год издания" value="{{ filters.year }}" />
+
+    <div class="filter-dropdown" data-filter="sort">
+      <input type="hidden" name="sort" value="{{ filters.sort }}" />
+      <button type="button" class="filter-dropdown-trigger" aria-expanded="false">
+        <span class="filter-dropdown-text">Сортировка</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+      <ul class="filter-dropdown-menu" role="listbox">
+        {% for value, label in sort_options %}
+        <li role="option" data-value="{{ value }}" data-label="{{ label }}" class="{% if filters.sort == value %}is-selected{% endif %}">{{ label }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <a class="reset-btn" href="{% if filters.q %}{{ url_for('index', q=filters.q) }}{% else %}{{ url_for('index') }}{% endif %}">
+      <i class="fa-solid fa-rotate-right"></i>Сбросить
+    </a>
+    </form>
   </div>
+</div>
 
-  <div class="filter-dropdown" data-filter="author">
-    <input type="hidden" name="author" value="{{ filters.author }}" />
-    <button type="button" class="filter-dropdown-trigger" aria-expanded="false">
-      <span class="filter-dropdown-text">{{ filters.author if filters.author else 'Все авторы' }}</span>
-      <i class="fa-solid fa-chevron-down"></i>
-    </button>
-    <ul class="filter-dropdown-menu" role="listbox">
-      <li role="option" data-value="" data-label="Все авторы" class="{% if not filters.author %}is-selected{% endif %}">Все авторы</li>
-      {% for a in authors %}
-      <li role="option" data-value="{{ a }}" data-label="{{ a }}" class="{% if filters.author == a %}is-selected{% endif %}">{{ a }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-
-  <input type="text" name="year" placeholder="Год издания" value="{{ filters.year }}" />
-
-  <div class="filter-dropdown" data-filter="sort">
-    <input type="hidden" name="sort" value="{{ filters.sort }}" />
-    <button type="button" class="filter-dropdown-trigger" aria-expanded="false">
-      <span class="filter-dropdown-text">Сортировка</span>
-      <i class="fa-solid fa-chevron-down"></i>
-    </button>
-    <ul class="filter-dropdown-menu" role="listbox">
-      {% for value, label in sort_options %}
-      <li role="option" data-value="{{ value }}" data-label="{{ label }}" class="{% if filters.sort == value %}is-selected{% endif %}">{{ label }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-
-  <a class="reset-btn" href="{% if filters.q %}{{ url_for('index', q=filters.q) }}{% else %}{{ url_for('index') }}{% endif %}">
-    <i class="fa-solid fa-rotate-right"></i>Сбросить
-  </a>
-</form>
-
-<div class="table-container">
+<div class="table-container desktop-only">
   {% if books %}
   <table>
     <thead>
@@ -230,7 +298,9 @@
   </div>
 </div>
 {% endif %}
+{% endblock %}
 
+{% block scripts %}
 <script>
   (function () {
     const filtersForm = document.getElementById("filters-form");
@@ -282,29 +352,57 @@
 
     document.addEventListener("click", () => closeAllDropdowns());
   })();
-</script>
 
-<script>
-  (function () {
-    const searchForm = document.querySelector(".search-form");
-    if (!searchForm) return;
-
+  document.querySelectorAll(".search-form, .mobile-search-form").forEach((searchForm) => {
     const searchInput = searchForm.querySelector(".search-input");
     const clearBtn = searchForm.querySelector(".search-clear-btn");
-    if (!searchInput || !clearBtn) return;
+    if (!searchInput) return;
 
     const updateClearVisibility = () => {
-      clearBtn.classList.toggle("is-visible", searchInput.value.trim().length > 0);
+      if (clearBtn) {
+        clearBtn.classList.toggle("is-visible", searchInput.value.trim().length > 0);
+      }
     };
 
-    clearBtn.addEventListener("click", () => {
-      searchInput.value = "";
-      updateClearVisibility();
-      searchForm.submit();
-    });
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        updateClearVisibility();
+        searchForm.submit();
+      });
+    }
 
     searchInput.addEventListener("input", updateClearVisibility);
     updateClearVisibility();
+
+    if (searchForm.classList.contains("mobile-search-form")) {
+      let debounceTimer;
+      searchInput.addEventListener("input", () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => searchForm.submit(), 450);
+      });
+    }
+  });
+
+  (function () {
+    const wrap = document.getElementById("filters-wrap");
+    const openBtn = document.querySelector(".mobile-filter-btn");
+    const closeBtn = document.querySelector(".mobile-filters-close");
+    const backdrop = document.querySelector(".mobile-filters-backdrop");
+    if (!wrap || !openBtn) return;
+
+    const closeFilters = () => {
+      wrap.classList.remove("is-open");
+      document.body.classList.remove("filters-open");
+    };
+    const openFilters = () => {
+      wrap.classList.add("is-open");
+      document.body.classList.add("filters-open");
+    };
+
+    openBtn.addEventListener("click", openFilters);
+    closeBtn?.addEventListener("click", closeFilters);
+    backdrop?.addEventListener("click", closeFilters);
   })();
 </script>
 

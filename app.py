@@ -325,6 +325,7 @@ def build_index_context(args, extra: dict | None = None) -> dict:
 
     context = {
         "books": paginated_books,
+        "all_books": books_view,
         "genres": GENRES,
         "genre_other": GENRE_OTHER,
         "authors": authors,
@@ -350,6 +351,11 @@ def build_index_context(args, extra: dict | None = None) -> dict:
 @app.get("/")
 def index():
     return render_template("index.html", **build_index_context(request.args))
+
+
+@app.get("/menu")
+def mobile_menu():
+    return render_template("menu.html")
 
 
 @app.get("/books/new")
@@ -398,17 +404,19 @@ def view_book(book_id: int):
     list_filters = filters_from_args(request.args)
     copies = load_book_copies(book)
     available_count = sum(1 for copy in copies if copy.status == "available")
-    return render_template(
-        "book.html",
-        book=book,
-        copies=copies,
-        available_count=available_count,
-        list_filters=list_filters,
-        filter_query=filters_to_query(list_filters),
-        genres=GENRES,
-        genre_other=GENRE_OTHER,
-        today=date.today().strftime("%d.%m.%Y"),
-    )
+    issued_count = sum(1 for copy in copies if copy.status == "issued")
+    book_ctx = {
+        "book": book,
+        "copies": copies,
+        "available_count": available_count,
+        "issued_count": issued_count,
+        "list_filters": list_filters,
+        "filter_query": filters_to_query(list_filters),
+        "genres": GENRES,
+        "genre_other": GENRE_OTHER,
+        "today": date.today().strftime("%d.%m.%Y"),
+    }
+    return render_template("book.html", **book_ctx)
 
 
 @app.post("/books/<int:book_id>/copies/<int:copy_num>/issue")
@@ -455,12 +463,14 @@ def issue_copy(book_id: int, copy_num: int):
 
     copies = load_book_copies(book)
     available_count = sum(1 for copy in copies if copy.status == "available")
+    issued_count = sum(1 for copy in copies if copy.status == "issued")
     return jsonify(
         {
             "ok": True,
             "status": new_status,
             "issued_at": issued_at,
             "available_count": available_count,
+            "issued_count": issued_count,
         }
     )
 
@@ -482,11 +492,13 @@ def edit_book(book_id: int):
         list_filters = filters_from_args(request.args)
         copies = load_book_copies(book)
         available_count = sum(1 for c in copies if c.status == "available")
+        issued_count = sum(1 for c in copies if c.status == "issued")
         return render_template(
             "book.html",
             book=book,
             copies=copies,
             available_count=available_count,
+            issued_count=issued_count,
             list_filters=list_filters,
             filter_query=filters_to_query(list_filters),
             genres=GENRES,
@@ -510,11 +522,13 @@ def confirm_delete_book(book_id: int):
         list_filters = filters_from_args(request.args)
         copies = load_book_copies(book)
         available_count = sum(1 for c in copies if c.status == "available")
+        issued_count = sum(1 for c in copies if c.status == "issued")
         return render_template(
             "book.html",
             book=book,
             copies=copies,
             available_count=available_count,
+            issued_count=issued_count,
             list_filters=list_filters,
             filter_query=filters_to_query(list_filters),
             genres=GENRES,

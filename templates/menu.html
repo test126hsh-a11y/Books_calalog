@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block mobile_header %}
+<a class="mobile-back-link" href="{{ url_for('index') }}" aria-label="Назад">
+  <i class="fa-solid fa-arrow-left"></i>
+</a>
+<h1 class="mobile-header-title">Книжный каталог</h1>
+{% endblock %}
+
+{% block content %}
+<section class="mobile-menu-page mobile-only">
+  <div class="mobile-menu-top">
+    <div class="mobile-menu-logo">
+      <img src="{{ url_for('static', filename='plum-logo.png') }}" alt="Plums" class="logo-img" />
+      <span>Книжный каталог</span>
+    </div>
+    <nav class="mobile-menu-nav menu">
+      <a href="{{ url_for('index') }}">
+        <i class="fa-solid fa-book"></i>
+        Книги
+      </a>
+      <a href="{{ url_for('new_book') }}">
+        <i class="fa-solid fa-plus"></i>
+        Добавить книгу
+      </a>
+    </nav>
+  </div>
+  <div class="brand">Plums</div>
+</section>
+
+<div class="desktop-only menu-desktop-fallback">
+  <p>Меню доступно в мобильной версии.</p>
+  <a class="add-btn" href="{{ url_for('index') }}">На главную</a>
+</div>
+{% endblock %}

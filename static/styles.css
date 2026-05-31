@@ -959,7 +959,522 @@ tbody tr {
   font-style: italic;
 }
 
-@media (max-width: 980px) {
+.mobile-only {
+  display: none !important;
+}
+
+/* ===== Mobile (phone) ===== */
+@media (max-width: 768px) {
+  .mobile-page,
+  .mobile-book-view,
+  .mobile-menu-page {
+    display: block !important;
+  }
+
+  .filters-wrap:not(.is-open) .mobile-filters-backdrop {
+    display: none !important;
+  }
+
+  .filters-wrap:not(.is-open) .filters-panel {
+    display: none !important;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  body.filters-open {
+    overflow: hidden;
+  }
+
+  .container {
+    flex-direction: column;
+    padding: 0;
+    gap: 0;
+    min-height: auto;
+  }
+
+  .main-content {
+    padding: 0 16px 24px;
+  }
+
+  .mobile-header {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #ececf0;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .mobile-menu-btn,
+  .mobile-back-link {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #d3d5dc;
+    border-radius: 10px;
+    background: #fff;
+    color: #4a4d55;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    flex-shrink: 0;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .mobile-header-title {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-header-title--truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-menu-page {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: calc(100dvh - 70px);
+    padding: 8px 0 12px;
+  }
+
+  .mobile-menu-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+
+  .mobile-menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mobile-menu-nav a {
+    text-decoration: none;
+    color: #3b3b41;
+    padding: 16px 18px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .mobile-menu-nav a:hover {
+    background: #f8e9f3;
+  }
+
+  .mobile-menu-page .brand {
+    margin-top: auto;
+    padding-top: 24px;
+  }
+
+  .menu-desktop-fallback {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .mobile-page {
+    padding-top: 4px;
+  }
+
+  .mobile-catalog-count {
+    color: #6d7078;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .mobile-toolbar {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-search-form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    border: 1px solid #d8d9df;
+    border-radius: 12px;
+    padding: 0 8px 0 12px;
+    min-height: 48px;
+    background: #fff;
+  }
+
+  .mobile-search-form input {
+    flex: 1;
+    border: none;
+    font-size: 15px;
+    background: transparent;
+    min-width: 0;
+  }
+
+  .mobile-search-form input:focus {
+    outline: none;
+  }
+
+  .mobile-filter-btn,
+  .mobile-add-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .mobile-filter-btn {
+    border: 1px solid #d3d5dc;
+    background: #fff;
+    color: #4a4d55;
+  }
+
+  .mobile-add-btn {
+    border: none;
+    background: #8f1a71;
+    color: #fff;
+  }
+
+  .mobile-results-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2d2f35;
+    margin-bottom: 10px;
+  }
+
+  .mobile-book-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mobile-book-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #dbdde2;
+    border-radius: 14px;
+    padding: 16px;
+    background: #fff;
+  }
+
+  .mobile-book-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #2d2f35;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .mobile-book-author {
+    font-size: 14px;
+    color: #6d7078;
+    margin-bottom: 6px;
+  }
+
+  .mobile-book-meta {
+    font-size: 13px;
+    color: #8a8d96;
+  }
+
+  .mobile-empty {
+    text-align: center;
+    color: #8a8d96;
+    padding: 40px 16px;
+  }
+
+  .filters-wrap.is-open .mobile-filters-backdrop {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    background: rgba(22, 24, 31, 0.42);
+    z-index: 80;
+  }
+
+  .filters-wrap.is-open .filters-panel {
+    display: block !important;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90;
+    background: #fff;
+    border-radius: 18px 18px 0 0;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 -8px 32px rgba(20, 22, 28, 0.16);
+  }
+
+  .mobile-filters-head {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 0;
+  }
+
+  .mobile-filters-head h2 {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .mobile-filters-close {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #f0f0f1;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #4a4d55;
+  }
+
+  .filters-wrap .filters {
+    display: none;
+    flex-direction: column;
+    border: none;
+    border-radius: 0;
+    padding: 12px 18px 24px;
+    gap: 10px;
+    margin: 0;
+  }
+
+  .filters-wrap.is-open .filters {
+    display: flex !important;
+  }
+
+  .filters-wrap .filter-dropdown,
+  .filters-wrap .filters input,
+  .filters-wrap .reset-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filters-wrap .filter-dropdown-trigger {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filters-wrap .filter-dropdown-menu {
+    max-width: none;
+    width: calc(100% - 16px);
+  }
+
+  .mobile-book-view {
+    padding-top: 8px;
+  }
+
+  .mobile-book-hero {
+    margin-bottom: 18px;
+  }
+
+  .mobile-book-hero-text h2 {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 6px;
+  }
+
+  .mobile-book-hero-author {
+    font-size: 15px;
+    color: #6d7078;
+    margin-bottom: 4px;
+  }
+
+  .mobile-book-hero-meta {
+    font-size: 14px;
+    color: #8a8d96;
+  }
+
+  .mobile-book-stats {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid #dbdde2;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+
+  .mobile-stat-item {
+    padding: 14px 8px;
+    text-align: center;
+    border-right: 1px solid #ececf0;
+  }
+
+  .mobile-stat-item:last-child {
+    border-right: none;
+  }
+
+  .mobile-stat-value {
+    display: block;
+    font-size: 22px;
+    font-weight: 700;
+    color: #2d2f35;
+    margin-bottom: 4px;
+  }
+
+  .mobile-stat-label {
+    font-size: 12px;
+    color: #6d7078;
+  }
+
+  .mobile-description {
+    margin-bottom: 18px;
+  }
+
+  .mobile-description h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .mobile-description-text {
+    font-size: 15px;
+    line-height: 1.55;
+    color: #4a4d55;
+  }
+
+  .mobile-description-text.is-clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .mobile-read-more {
+    margin-top: 8px;
+    border: none;
+    background: none;
+    color: #8f1a71;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+  }
+
+  .mobile-copies-card {
+    margin-bottom: 18px;
+    padding: 18px;
+    border: 1px solid #dbdde2;
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  .mobile-book-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .mobile-action-btn {
+    min-height: 48px;
+    border-radius: 12px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid #d3d5dc;
+    background: #fff;
+    color: #2d2f35;
+  }
+
+  .mobile-action-delete {
+    color: #e53935;
+    border-color: #f5c6c5;
+  }
+
+  .add-book-card {
+    border: none;
+    border-radius: 0;
+    padding: 8px 0 0;
+    background: transparent;
+  }
+
+  .add-book-form label {
+    font-weight: 600;
+  }
+
+  .add-form-actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .add-form-actions .add-btn,
+  .add-form-actions .modal-cancel-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 52px;
+  }
+
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  .edit-modal,
+  .delete-modal {
+    width: 100%;
+    border-radius: 18px;
+    padding: 20px 16px;
+  }
+
+  .edit-modal-header h1,
+  .delete-modal h2 {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-filters-head {
+    display: none !important;
+  }
+
+  .mobile-filters-backdrop {
+    display: none !important;
+  }
+
+  .filters-wrap .filters-panel {
+    display: block;
+  }
+
+  .filters-wrap .filters {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 980px) and (min-width: 769px) {
   .sidebar {
     display: none;
   }
@@ -989,42 +1504,8 @@ tbody tr {
     grid-template-columns: 1fr;
   }
 
-  .add-form-actions {
-    flex-direction: column-reverse;
-    gap: 10px;
-  }
-
-  .add-form-actions .add-btn,
-  .add-form-actions .modal-cancel-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .book-page-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .book-header-actions {
-    flex-direction: column;
-  }
-
-  .book-edit-btn,
-  .book-delete-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
   .book-detail-layout {
     grid-template-columns: 1fr;
-  }
-
-  .book-detail-head h1 {
-    font-size: 30px;
-  }
-
-  .book-author {
-    font-size: 18px;
   }
 
   .book-copy-row {
@@ -1034,6 +1515,5 @@ tbody tr {
 
   .copy-status-btn {
     width: 100%;
-    justify-content: center;
   }
 }
