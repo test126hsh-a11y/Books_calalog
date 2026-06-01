@@ -914,8 +914,8 @@ tbody tr {
 }
 
 .copy-status-btn.is-available {
-  background: #e8f7ec;
-  color: #2e7d32;
+  background: #D5FFDE;
+  color: #5EBC72;
 }
 
 .copy-status-btn.is-available:hover {
@@ -923,12 +923,12 @@ tbody tr {
 }
 
 .copy-status-btn.is-issued {
-  background: #fff3e0;
-  color: #e65100;
+  background: #FFEEB8;
+  color: #D2B75E;
 }
 
 .copy-status-btn.is-issued:hover {
-  background: #ffe8c2;
+  background: #FAE6A5;
 }
 
 .book-copies-empty {
@@ -1516,4 +1516,16 @@ tbody tr {
   .copy-status-btn {
     width: 100%;
   }
+}
+
+.copy-status-btn {
+transition:  background-color 0.25s ease, color 0.25s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.copy-status-btn:hover {
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.copy-status-btn:active {
+transform: scale(0.93);
 }
