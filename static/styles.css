@@ -503,23 +503,64 @@ tbody tr {
   background: rgba(22, 24, 31, 0.42);
   backdrop-filter: blur(1px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: 20px;
+  overflow-y: auto;
 }
 
 .edit-modal {
   width: min(560px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   background: #fff;
   border-radius: 22px;
   border: 1px solid #d9dce3;
   box-shadow: 0 28px 58px rgba(20, 22, 28, 0.32);
   padding: 22px;
+  margin: auto 0;
+  flex-shrink: 0;
 }
 
 .edit-modal-header h1 {
-  font-size: 34px;
-  margin-bottom: 14px;
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.edit-modal .book-form {
+  gap: 10px;
+}
+
+.edit-modal .book-form textarea {
+  min-height: 88px;
+}
+
+.edit-modal .form-group-file {
+  gap: 8px;
+}
+
+.edit-modal .cover-preview-current img,
+.edit-modal .cover-preview-new img {
+  max-width: 72px;
+  max-height: 100px;
+}
+
+.edit-modal .cover-preview-hint {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.edit-modal .file-input-label {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.edit-modal .form-actions {
+  margin-top: 10px;
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding-top: 10px;
 }
 
 .edit-modal .add-btn {
@@ -689,6 +730,245 @@ tbody tr {
   margin-top: 16px;
 }
 
+.form-group-file {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.file-label-title {
+  color: #2d2f35;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.file-input-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px dashed #c5c8d0;
+  border-radius: 10px;
+  background: #f8f9fb;
+  color: #4a4d55;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.file-input-label:hover {
+  border-color: #8a226f;
+  background: #fce8f6;
+  color: #8a226f;
+}
+
+.file-input-label:hover i {
+  color: #8a226f;
+}
+
+.file-input-field {
+  display: none;
+}
+
+.cover-preview-current,
+.cover-preview-new {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.cover-preview-current img,
+.cover-preview-new img {
+  max-width: 120px;
+  max-height: 180px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(24, 24, 28, 0.12);
+  object-fit: cover;
+}
+
+.cover-preview-hint {
+  font-size: 13px;
+  color: #6b6f78;
+  font-weight: 500;
+}
+
+.book-form .form-group-file {
+  margin-bottom: 4px;
+}
+
+.book-form--edit .file-input-field {
+  display: none;
+}
+
+.edit-form-header {
+  display: block;
+  margin-bottom: 0;
+}
+
+.edit-form-cover {
+  display: none;
+}
+
+.edit-form-cover-desktop {
+  display: block;
+}
+
+.save-btn-text-mobile {
+  display: none;
+}
+
+.change-cover-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .edit-modal .edit-modal-header {
+    display: none;
+  }
+
+  .edit-modal .modal-close {
+    display: none;
+  }
+
+  .edit-form-header {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 4px;
+  }
+
+  .edit-form-cover {
+    flex-shrink: 0;
+    width: 88px;
+  }
+
+  .edit-form-cover-img {
+    display: block;
+    width: 88px;
+    height: 124px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(24, 24, 28, 0.12);
+  }
+
+  .edit-form-cover-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 124px;
+    border-radius: 8px;
+    border: 1px dashed #d5d7dd;
+    background: #f5f6f8;
+    color: #a0a4ad;
+    font-size: 24px;
+  }
+
+  .edit-form-header-side {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .edit-form-title-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #555a66;
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .edit-form-title-label input {
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d5d7dd;
+    font-size: 14px;
+    font-weight: 400;
+    color: #2d2f35;
+    font-family: inherit;
+  }
+
+  .change-cover-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 10px;
+    background: #8A226F;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .change-cover-btn:hover {
+    background: #7c165f;
+  }
+
+  .edit-form-cover-desktop {
+    display: none;
+  }
+
+  .edit-modal .form-actions {
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .edit-modal .form-actions .modal-cancel-btn,
+  .edit-modal .form-actions .add-btn {
+    flex: 1;
+    justify-content: center;
+    min-height: 48px;
+    border-radius: 10px;
+  }
+
+  .edit-modal .form-actions .add-btn {
+    background: #8A226F;
+    border-color: #8A226F;
+  }
+
+  .edit-modal .form-actions .add-btn:hover {
+    background: #7c165f;
+  }
+
+  .save-btn-text-desktop {
+    display: none;
+  }
+
+  .save-btn-text-mobile {
+    display: inline;
+  }
+
+  .book-form--edit label {
+    font-weight: 400;
+  }
+
+  .book-form--edit textarea {
+    min-height: 110px;
+  }
+}
+
+@media (min-width: 769px) {
+  .save-btn-text-mobile {
+    display: none;
+  }
+
+  .save-btn-text-desktop {
+    display: inline;
+  }
+}
+
 .add-form-actions {
   margin-top: 22px;
   display: flex;
@@ -775,13 +1055,113 @@ tbody tr {
 }
 
 .book-detail-layout {
+  display: block;
+}
+
+.book-detail-top {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
   gap: 20px;
   align-items: start;
 }
 
-.book-detail-card,
+.book-detail-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #dbdde2;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(24, 24, 28, 0.04);
+}
+
+.book-detail-hero {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.book-detail-cover {
+  flex-shrink: 0;
+  width: 168px;
+}
+
+.book-detail-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.book-detail-cover .book-cover-img {
+  display: block;
+  width: 168px;
+  height: 248px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(24, 24, 28, 0.12);
+}
+
+.book-detail-cover .book-cover-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 168px;
+  height: 248px;
+  border-radius: 10px;
+  border: 1px dashed #d5d7dd;
+  background: #f5f6f8;
+  color: #8b8f98;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.book-cover-img {
+  display: block;
+  width: 100%;
+  max-height: 270px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(24, 24, 28, 0.14);
+}
+
+.book-cover-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 180px;
+  height: 250px;
+  border-radius: 12px;
+  border: 1px dashed #d5d7dd;
+  background: #f5f6f8;
+  color: #8b8f98;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.book-cover-placeholder i {
+  font-size: 32px;
+}
+
+.mobile-book-cover {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.mobile-book-cover .book-cover-img {
+  max-width: 140px;
+  margin: 0 auto;
+}
+
+.mobile-book-cover .book-cover-placeholder {
+  width: 140px;
+  height: 200px;
+  margin: 0 auto;
+}
+
 .book-copies-card {
   background: #fff;
   border: 1px solid #dbdde2;
@@ -845,7 +1225,7 @@ tbody tr {
   padding: 6px 14px;
   font-size: 14px;
   font-weight: 500;
-  margin-bottom: 22px;
+  margin-top: 4px;
 }
 
 .book-copies-title {
@@ -937,15 +1317,18 @@ tbody tr {
 }
 
 .book-description-box {
-  border: 1px solid #dbdde2;
-  border-radius: 14px;
+  margin-top: 24px;
+  border: 1px solid #e3e5ea;
+  border-radius: 12px;
   padding: 18px 20px;
+  background: #fff;
 }
 
 .book-description-box h2 {
   font-size: 18px;
   margin-bottom: 10px;
   font-weight: 600;
+  color: #2d2f35;
 }
 
 .book-description-box p {
@@ -1504,7 +1887,7 @@ tbody tr {
     grid-template-columns: 1fr;
   }
 
-  .book-detail-layout {
+  .book-detail-top {
     grid-template-columns: 1fr;
   }
 

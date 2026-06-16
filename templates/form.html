@@ -15,7 +15,7 @@
 </div>
 
 <div class="add-book-card">
-  <form class="add-book-form" method="post" action="{{ url_for('create_book') }}">
+  <form class="add-book-form" method="post" action="{{ url_for('create_book') }}" enctype="multipart/form-data">
     <div class="form-grid">
       <label>
         Название книги
@@ -47,6 +47,9 @@
         Количество экземпляров
         <input name="copies" type="number" min="0" required value="3" />
       </label>
+      {% with current_image='' %}
+      {% include '_cover_field.html' %}
+      {% endwith %}
     </div>
 
     <label class="full-width">

@@ -233,46 +233,13 @@
       <h1>Редактирование книги</h1>
     </div>
 
-    <form class="book-form" method="post" action="{{ filter_url('update_book', filter_query, book_id=modal_book.id) }}">
-      <label>
-        Название книги
-        <input name="title" type="text" required value="{{ modal_book.title }}" />
-      </label>
-      <label>
-        Автор
-        <input name="author" type="text" required value="{{ modal_book.author }}" />
-      </label>
-      <label>
-        Год издания
-        <input name="year" type="number" min="0" required value="{{ modal_book.year }}" />
-      </label>
-      <label>
-        Жанр
-        <select name="genre" class="genre-select" required>
-          {% for g in genres %}
-          <option value="{{ g }}" {% if form_genre == g %}selected{% endif %}>{{ g }}</option>
-          {% endfor %}
-          <option value="{{ genre_other }}" {% if form_genre == genre_other %}selected{% endif %}>{{ genre_other }}</option>
-        </select>
-      </label>
-      <label class="genre-other-field {% if form_genre != genre_other %}hidden{% endif %}">
-        Укажите жанр
-        <input name="genre_other" type="text" value="{{ form_genre_other }}" placeholder="Введите жанр" />
-      </label>
-      <label>
-        Кол-во экземпляров
-        <input name="copies" type="number" min="0" required value="{{ modal_book.copies }}" />
-      </label>
-      <label>
-        Описание
-        <textarea name="description" rows="3">{{ modal_book.description }}</textarea>
-      </label>
-
-      <div class="form-actions">
-        <a class="modal-cancel-btn" href="{{ filter_url('index', filter_query) }}">Отмена</a>
-        <button type="submit" class="add-btn">Сохранить изменения</button>
-      </div>
-    </form>
+    {% with
+      update_action=filter_url('update_book', filter_query, book_id=modal_book.id),
+      cancel_url=filter_url('index', filter_query),
+      return_to=''
+    %}
+    {% include '_edit_book_form.html' %}
+    {% endwith %}
   </div>
 </div>
 {% endif %}

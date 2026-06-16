@@ -1,0 +1,87 @@
+<form
+  class="book-form book-form--edit"
+  method="post"
+  action="{{ update_action }}"
+  enctype="multipart/form-data"
+>
+  {% if return_to %}
+  <input type="hidden" name="return_to" value="{{ return_to }}" />
+  {% endif %}
+
+  <input
+    name="image"
+    type="file"
+    accept="image/png,image/jpeg,image/webp"
+    class="file-input-field"
+    data-cover-input
+  />
+
+  <div class="edit-form-header">
+    <div class="edit-form-cover">
+      {% if modal_book.image_url %}
+      <img
+        class="edit-form-cover-img"
+        src="{{ url_for('static', filename='images/' + modal_book.image_url) }}"
+        alt="Обложка"
+        data-cover-display-img
+      />
+      {% else %}
+      <div class="edit-form-cover-placeholder" data-cover-display-placeholder>
+        <i class="fa-solid fa-book"></i>
+      </div>
+      {% endif %}
+    </div>
+    <div class="edit-form-header-side">
+      <label class="edit-form-title-label">
+        Название книги
+        <input name="title" type="text" required value="{{ modal_book.title }}" />
+      </label>
+      <button type="button" class="change-cover-btn" data-cover-trigger>Изменить обложку</button>
+    </div>
+  </div>
+
+  <label>
+    Автор
+    <input name="author" type="text" required value="{{ modal_book.author }}" />
+  </label>
+  <label>
+    Год издания
+    <input name="year" type="number" min="0" required value="{{ modal_book.year }}" />
+  </label>
+  <label>
+    Жанр
+    <select name="genre" class="genre-select" required>
+      {% for g in genres %}
+      <option value="{{ g }}" {% if form_genre == g %}selected{% endif %}>{{ g }}</option>
+      {% endfor %}
+      <option value="{{ genre_other }}" {% if form_genre == genre_other %}selected{% endif %}>{{ genre_other }}</option>
+    </select>
+  </label>
+  <label class="genre-other-field {% if form_genre != genre_other %}hidden{% endif %}">
+    Укажите жанр
+    <input name="genre_other" type="text" value="{{ form_genre_other }}" placeholder="Введите жанр" />
+  </label>
+  <label>
+    Кол-во экземпляров
+    <input name="copies" type="number" min="0" required value="{{ modal_book.copies }}" />
+  </label>
+
+  <div class="edit-form-cover-desktop">
+    {% with current_image=modal_book.image_url, external_input=true %}
+    {% include '_cover_field.html' %}
+    {% endwith %}
+  </div>
+
+  <label>
+    Описание
+    <textarea name="description" rows="3">{{ modal_book.description }}</textarea>
+  </label>
+
+  <div class="form-actions">
+    <a class="modal-cancel-btn" href="{{ cancel_url }}">Отмена</a>
+    <button type="submit" class="add-btn">
+      <span class="save-btn-text-desktop">Сохранить изменения</span>
+      <span class="save-btn-text-mobile">Сохр. Изм.</span>
+    </button>
+  </div>
+</form>

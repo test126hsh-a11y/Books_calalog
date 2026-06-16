@@ -1,0 +1,12 @@
+{% if book.image_url %}
+<img
+  class="book-cover-img"
+  src="{{ url_for('static', filename='images/' + book.image_url) }}"
+  alt="Обложка книги «{{ book.title }}»"
+/>
+{% else %}
+<div class="book-cover-placeholder" aria-hidden="true">
+  <i class="fa-solid fa-book"></i>
+  <span>Нет обложки</span>
+</div>
+{% endif %}

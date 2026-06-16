@@ -1,16 +1,51 @@
 from __future__ import annotations
 
+import os
 import sqlite3
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from uuid import uuid4
 
 from flask import Flask, jsonify, redirect, render_template, request, url_for
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 DB_FILE = Path("data") / "books.db"
 
+UPLOAD_FOLDER = 'static/images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename: str) -> bool:
+    return (
+        bool(filename)
+        and "." in filename
+        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
+
+
+def _ensure_upload_folder() -> None:
+    Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
+
+
+def save_cover_image(file) -> Optional[str]:
+    if not file or not allowed_file(file.filename):
+        return None
+    _ensure_upload_folder()
+    ext = secure_filename(file.filename).rsplit(".", 1)[-1].lower()
+    filename = f"{uuid4().hex}.{ext}"
+    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+    return filename
+
+
+def delete_cover_image(filename: Optional[str]) -> None:
+    if not filename:
+        return
+    path = Path(app.config["UPLOAD_FOLDER"]) / filename
+    if path.is_file():
+        path.unlink()
 
 @app.template_global()
 def filter_url(endpoint: str, filter_query: dict | None = None, **kwargs: Any) -> str:
@@ -50,6 +85,7 @@ class Book:
     genre: str
     copies: int
     description: str = ""
+    image_url: str = ""
 
 
 @dataclass
@@ -77,6 +113,8 @@ def _ensure_description_column(conn: sqlite3.Connection) -> None:
     columns = {row["name"] for row in conn.execute("PRAGMA table_info(books)")}
     if "description" not in columns:
         conn.execute("ALTER TABLE books ADD COLUMN description TEXT NOT NULL DEFAULT ''")
+    if "image_url" not in columns:
+        conn.execute("ALTER TABLE books ADD COLUMN image_url TEXT")
 
 
 def _ensure_copies_table(conn: sqlite3.Connection) -> None:
@@ -106,7 +144,8 @@ def init_db() -> None:
                 year INTEGER NOT NULL,
                 genre TEXT NOT NULL,
                 copies INTEGER NOT NULL CHECK (copies >= 0),
-                description TEXT NOT NULL DEFAULT ''
+                description TEXT NOT NULL DEFAULT '',
+                image_url TEXT
             )
             """
         )
@@ -118,7 +157,7 @@ def load_books() -> List[Book]:
     init_db()
     with get_connection() as conn:
         rows = conn.execute(
-            "SELECT id, title, author, year, genre, copies, description FROM books"
+            "SELECT id, title, author, year, genre, copies, description, image_url FROM books"
         ).fetchall()
     return [
         Book(
@@ -129,6 +168,7 @@ def load_books() -> List[Book]:
             genre=row["genre"],
             copies=row["copies"],
             description=row["description"] or "",
+            image_url=row["image_url"] or "",
         )
         for row in rows
     ]
@@ -374,11 +414,14 @@ def new_book():
 @app.post("/books")
 def create_book():
     init_db()
+
+    image_filename = save_cover_image(request.files.get("image"))
+
     with get_connection() as conn:
         conn.execute(
             """
-            INSERT INTO books (title, author, year, genre, copies, description)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO books (title, author, year, genre, copies, description, image_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 request.form.get("title", "").strip(),
@@ -387,6 +430,7 @@ def create_book():
                 resolve_genre_from_form(),
                 max(0, parse_int(request.form.get("copies", "0"))),
                 request.form.get("description", "").strip(),
+                image_filename
             ),
         )
     return redirect(url_for("index"))
@@ -545,23 +589,58 @@ def confirm_delete_book(book_id: int):
 @app.post("/books/<int:book_id>/update")
 def update_book(book_id: int):
     init_db()
+
+    new_image_filename = save_cover_image(request.files.get("image"))
+    old_image_filename: Optional[str] = None
+
+    if new_image_filename:
+        with get_connection() as conn:
+            row = conn.execute(
+                "SELECT image_url FROM books WHERE id = ?", (book_id,)
+            ).fetchone()
+            if row:
+                old_image_filename = row["image_url"]
+
     with get_connection() as conn:
-        conn.execute(
-            """
-            UPDATE books
-            SET title = ?, author = ?, year = ?, genre = ?, copies = ?, description = ?
-            WHERE id = ?
-            """,
-            (
-                request.form.get("title", "").strip(),
-                request.form.get("author", "").strip(),
-                parse_int(request.form.get("year", "0")),
-                resolve_genre_from_form(),
-                max(0, parse_int(request.form.get("copies", "0"))),
-                request.form.get("description", "").strip(),
-                book_id,
-            ),
-        )
+        if new_image_filename:
+            conn.execute(
+                """
+                UPDATE books 
+                SET title = ?, author = ?, year = ?, genre = ?, copies = ?, description = ?, image_url = ?
+                WHERE id = ?
+                """,
+                (
+                    request.form.get("title", "").strip(),
+                    request.form.get("author", "").strip(),
+                    parse_int(request.form.get("year", "0")),
+                    resolve_genre_from_form(),
+                    max(0, parse_int(request.form.get("copies", "0"))),
+                    request.form.get("description", "").strip(),
+                    new_image_filename,
+                    book_id,
+                ),
+            )
+        else:
+            conn.execute(
+                """
+                UPDATE books 
+                SET title = ?, author = ?, year = ?, genre = ?, copies = ?, description = ?
+                WHERE id = ?
+                """,
+                (
+                    request.form.get("title", "").strip(),
+                    request.form.get("author", "").strip(),
+                    parse_int(request.form.get("year", "0")),
+                    resolve_genre_from_form(),
+                    max(0, parse_int(request.form.get("copies", "0"))),
+                    request.form.get("description", "").strip(),
+                    book_id,
+                ),
+            )
+
+    if new_image_filename and old_image_filename:
+        delete_cover_image(old_image_filename)
+
     if request.form.get("return_to") == "view":
         list_filters = filters_from_args(request.args)
         return redirect(url_for("view_book", book_id=book_id, **filters_to_query(list_filters)))
@@ -572,9 +651,16 @@ def update_book(book_id: int):
 @app.post("/books/<int:book_id>/delete")
 def delete_book(book_id: int):
     init_db()
+    image_filename: Optional[str] = None
     with get_connection() as conn:
+        row = conn.execute(
+            "SELECT image_url FROM books WHERE id = ?", (book_id,)
+        ).fetchone()
+        if row:
+            image_filename = row["image_url"]
         conn.execute("DELETE FROM book_copies WHERE book_id = ?", (book_id,))
         conn.execute("DELETE FROM books WHERE id = ?", (book_id,))
+    delete_cover_image(image_filename)
     list_filters = filters_from_args(request.args)
     return redirect(url_for("index", **filters_to_query(list_filters)))
 

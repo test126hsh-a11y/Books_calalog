@@ -32,6 +32,9 @@
 
 <section class="mobile-book-view mobile-only">
   <div class="mobile-book-hero">
+    <div class="mobile-book-cover">
+      {% include '_book_cover_display.html' %}
+    </div>
     <div class="mobile-book-hero-text">
       <h2>{{ book.title }}</h2>
       <p class="mobile-book-hero-author">{{ book.author }}</p>
@@ -106,56 +109,64 @@
 </section>
 
 <div class="book-detail-layout desktop-only">
-  <article class="book-detail-card">
-    <header class="book-detail-head">
-      <h1>{{ book.title }}</h1>
-      <p class="book-author">{{ book.author }}</p>
-    </header>
-
-    <ul class="book-meta-list">
-      <li>
-        <i class="fa-regular fa-calendar"></i>
-        <div>
-          <span class="meta-label">Год издания</span>
-          <span class="meta-value">{{ book.year }}</span>
+  <div class="book-detail-top">
+    <article class="book-detail-card">
+      <div class="book-detail-hero">
+        <div class="book-detail-cover">
+          {% include '_book_cover_display.html' %}
         </div>
-      </li>
-      <li>
-        <i class="fa-solid fa-masks-theater"></i>
-        <div>
-          <span class="meta-label">Жанр</span>
-          <span class="meta-value">{{ book.genre }}</span>
-        </div>
-      </li>
-      <li>
-        <i class="fa-solid fa-box"></i>
-        <div>
-          <span class="meta-label">Количество экземпляров</span>
-          <span class="meta-value">{{ book.copies }}</span>
-        </div>
-      </li>
-      <li>
-        <i class="fa-regular fa-user"></i>
-        <div>
-          <span class="meta-label">Доступно</span>
-          <span class="meta-value" id="available-count">{{ available_count }}</span>
-        </div>
-      </li>
-    </ul>
+        <div class="book-detail-main">
+          <header class="book-detail-head">
+            <h1>{{ book.title }}</h1>
+            <p class="book-author">{{ book.author }}</p>
+          </header>
 
-    <span class="genre-pill">{{ book.genre }}</span>
+          <ul class="book-meta-list">
+            <li>
+              <i class="fa-regular fa-calendar"></i>
+              <div>
+                <span class="meta-label">Год издания</span>
+                <span class="meta-value">{{ book.year }}</span>
+              </div>
+            </li>
+            <li>
+              <i class="fa-solid fa-masks-theater"></i>
+              <div>
+                <span class="meta-label">Жанр</span>
+                <span class="meta-value">{{ book.genre }}</span>
+              </div>
+            </li>
+            <li>
+              <i class="fa-solid fa-box"></i>
+              <div>
+                <span class="meta-label">Количество экземпляров</span>
+                <span class="meta-value">{{ book.copies }}</span>
+              </div>
+            </li>
+            <li>
+              <i class="fa-regular fa-user"></i>
+              <div>
+                <span class="meta-label">Доступно</span>
+                <span class="meta-value" id="available-count">{{ available_count }}</span>
+              </div>
+            </li>
+          </ul>
 
-    <section class="book-description-box">
-      <h2>Описание</h2>
-      {% if book.description %}
-      <p>{{ book.description }}</p>
-      {% else %}
-      <p class="description-empty">Описание пока не добавлено.</p>
-      {% endif %}
-    </section>
-  </article>
+          <span class="genre-pill">{{ book.genre }}</span>
+        </div>
+      </div>
 
-  <aside class="book-copies-card">
+      <section class="book-description-box">
+        <h2>Описание</h2>
+        {% if book.description %}
+        <p>{{ book.description }}</p>
+        {% else %}
+        <p class="description-empty">Описание пока не добавлено.</p>
+        {% endif %}
+      </section>
+    </article>
+
+    <aside class="book-copies-card">
     <h2 class="book-copies-title">Экземпляры книги</h2>
     {% if copies %}
     <ul class="book-copies-list">
@@ -182,7 +193,8 @@
     {% else %}
     <p class="book-copies-empty">Экземпляры не добавлены.</p>
     {% endif %}
-  </aside>
+    </aside>
+  </div>
 </div>
 
 {% if modal_mode == "edit" and modal_book %}
@@ -193,47 +205,13 @@
       <h1>Редактирование книги</h1>
     </div>
 
-    <form class="book-form" method="post" action="{{ filter_url('update_book', filter_query, book_id=modal_book.id) }}">
-      <input type="hidden" name="return_to" value="view" />
-      <label>
-        Название книги
-        <input name="title" type="text" required value="{{ modal_book.title }}" />
-      </label>
-      <label>
-        Автор
-        <input name="author" type="text" required value="{{ modal_book.author }}" />
-      </label>
-      <label>
-        Год издания
-        <input name="year" type="number" min="0" required value="{{ modal_book.year }}" />
-      </label>
-      <label>
-        Жанр
-        <select name="genre" class="genre-select" required>
-          {% for g in genres %}
-          <option value="{{ g }}" {% if form_genre == g %}selected{% endif %}>{{ g }}</option>
-          {% endfor %}
-          <option value="{{ genre_other }}" {% if form_genre == genre_other %}selected{% endif %}>{{ genre_other }}</option>
-        </select>
-      </label>
-      <label class="genre-other-field {% if form_genre != genre_other %}hidden{% endif %}">
-        Укажите жанр
-        <input name="genre_other" type="text" value="{{ form_genre_other }}" placeholder="Введите жанр" />
-      </label>
-      <label>
-        Кол-во экземпляров
-        <input name="copies" type="number" min="0" required value="{{ modal_book.copies }}" />
-      </label>
-      <label>
-        Описание
-        <textarea name="description" rows="4">{{ modal_book.description }}</textarea>
-      </label>
-
-      <div class="form-actions">
-        <a class="modal-cancel-btn" href="{{ filter_url('view_book', filter_query, book_id=book.id) }}">Отмена</a>
-        <button type="submit" class="add-btn">Сохранить изменения</button>
-      </div>
-    </form>
+    {% with
+      update_action=filter_url('update_book', filter_query, book_id=modal_book.id),
+      cancel_url=filter_url('view_book', filter_query, book_id=book.id),
+      return_to='view'
+    %}
+    {% include '_edit_book_form.html' %}
+    {% endwith %}
   </div>
 </div>
 {% endif %}

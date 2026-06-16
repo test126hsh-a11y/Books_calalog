@@ -1,0 +1,20 @@
+<div class="form-group-file">
+  <span class="file-label-title">Обложка книги</span>
+  {% if current_image %}
+  <div class="cover-preview-current">
+    <img src="{{ url_for('static', filename='images/' + current_image) }}" alt="Текущая обложка" />
+    <span class="cover-preview-hint">Текущая обложка. Выберите файл, чтобы заменить.</span>
+  </div>
+  {% endif %}
+  <label class="file-input-label"{% if external_input %} data-cover-trigger{% endif %}>
+    <i class="fa-solid fa-image"></i>
+    <span class="file-input-text">{% if current_image %}Заменить обложку{% else %}Выбрать изображение{% endif %}</span>
+    {% if not external_input %}
+    <input name="image" type="file" accept="image/png,image/jpeg,image/webp" class="file-input-field" data-cover-input />
+    {% endif %}
+  </label>
+  <div class="cover-preview-new hidden" data-cover-preview>
+    <img alt="Предпросмотр обложки" data-cover-preview-img />
+    <span class="cover-preview-hint">Новая обложка</span>
+  </div>
+</div>

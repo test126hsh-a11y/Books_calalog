@@ -50,5 +50,65 @@
     </div>
 
     {% block scripts %}{% endblock %}
+    <script>
+      document.querySelectorAll(".book-form--edit, .add-book-form").forEach((form) => {
+        const input = form.querySelector("[data-cover-input]");
+        if (!input) return;
+
+        form.querySelectorAll("[data-cover-trigger]").forEach((trigger) => {
+          trigger.addEventListener("click", (event) => {
+            event.preventDefault();
+            input.click();
+          });
+        });
+
+        input.addEventListener("change", () => {
+          const file = input.files?.[0];
+          const objectUrl = file ? URL.createObjectURL(file) : "";
+
+          const group = input.closest(".form-group-file");
+          const preview = group?.querySelector("[data-cover-preview]");
+          const previewImg = preview?.querySelector("[data-cover-preview-img]");
+          if (preview && previewImg) {
+            if (file) {
+              previewImg.src = objectUrl;
+              preview.classList.remove("hidden");
+            } else {
+              previewImg.removeAttribute("src");
+              preview.classList.add("hidden");
+            }
+          }
+
+          const headerImg = form.querySelector("[data-cover-display-img]");
+          const headerPlaceholder = form.querySelector("[data-cover-display-placeholder]");
+          if (file && headerImg) {
+            headerImg.src = objectUrl;
+          } else if (file && headerPlaceholder) {
+            headerPlaceholder.outerHTML =
+              '<img class="edit-form-cover-img" alt="Обложка" data-cover-display-img src="' +
+              objectUrl +
+              '" />';
+          }
+        });
+      });
+
+      document.querySelectorAll(".add-book-form [data-cover-input]").forEach((input) => {
+        const group = input.closest(".form-group-file");
+        const preview = group?.querySelector("[data-cover-preview]");
+        const previewImg = preview?.querySelector("[data-cover-preview-img]");
+        if (!preview || !previewImg) return;
+
+        input.addEventListener("change", () => {
+          const file = input.files?.[0];
+          if (file) {
+            previewImg.src = URL.createObjectURL(file);
+            preview.classList.remove("hidden");
+          } else {
+            previewImg.removeAttribute("src");
+            preview.classList.add("hidden");
+          }
+        });
+      });
+    </script>
   </body>
 </html>
